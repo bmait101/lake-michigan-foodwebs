@@ -49,13 +49,12 @@ dat_csmi_2015 <-
   relocate(site_name, .after = site_code) |> 
   relocate(spp_name, .after = spp_code) |> 
   mutate(across(2:7, as_factor))
-  
+
+# check it  
 dat_csmi_2015
 
-summary(dat_csmi_2015)
+# save cleaned data
+write_rds(dat_csmi_2015, here("data/dat_csmi_2015.rds"))
 
 
-dat_csmi_2015 |> 
-  group_by(spp_name) |> 
-  tally() |> arrange(spp_name) |> print(n=Inf) 
 
