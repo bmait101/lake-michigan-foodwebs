@@ -7,7 +7,10 @@
 #----------------------------------------------#
 
 ## Libraries
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(forcats)
+library(ggplot2); theme_set(theme_bw())
 library(here)
 source(here("R/xrefs.R"))
 
@@ -28,8 +31,7 @@ dat_csmi2015_raw |> skimr::skim()
 ## Clean -----
 
 # Clean up columns
-dat_csmi2015 <- 
-  dat_csmi2015_raw |> 
+dat_csmi2015 <- dat_csmi2015_raw |> 
   # remove columns we don't need
   select(
     -Depth_O,  # ???
@@ -69,7 +71,8 @@ dat_csmi2015 <-
   relocate(d13C, .after = d15N) |> 
   relocate(site_name, .after = site_code) |> 
   relocate(spp_name, .after = spp_code) |> 
-  mutate(across(2:7, as_factor))
+  mutate(across(2:7, as_factor)) |> 
+  mutate(season = fct_relevel(season, c('May', 'Jun/Jul', 'Aug/Sep')))
 
 
 # Check it
@@ -96,9 +99,12 @@ dat_csmi2015 |> filter(is.na(d13C))
 #   also unclear what site "0" is... only three samples so removing them
 # 12 samples missing season information
 
-# Remove samples with missing data and assogn POM sample types
+# Remove samples with missing data and assign POM sample types
 dat_csmi2015 <- dat_csmi2015 |> 
   drop_na(d15N, d13C, depth_m, site_code, site_name, season) |> 
+  filter(!site_code == "Z.unk") |> 
+  filter(!site_name == "Unknown") |> 
+  droplevels() |> 
   mutate(sample_type = coalesce(sample_type, "POM")) 
 
 # Check it
@@ -123,3 +129,44 @@ dat_csmi2015 <- dat_csmi2015 |>
 
 # Check it
 dat_csmi2015 |> skimr::skim()
+
+
+## Visuals -----
+
+# Total samples by site and season
+dat_csmi2015 |> 
+  count(site_name, season) |> 
+  complete(site_name, season, fill = list(n=0)) |> 
+  ggplot(aes(x=site_name, y=n)) + 
+  geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
+  labs(title = "Count of samples by site and season", 
+       x = "", y = "Number of samples", fill = "Season")
+
+
+# Samples by site and season, facet by species
+dat_csmi2015 |> 
+  count(site_code, season, spp_name) |> 
+  complete(site_code, season, spp_name, fill = list(n=0)) |> 
+  ggplot(aes(x=site_code, y=n)) + 
+  facet_wrap(vars(spp_name)) + 
+  geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
+  # scale_y_continuous(limits = c(0,10)) + 
+  labs(title = "Count of samples by site and season", 
+       x = "", y = "Number of samples", fill = "Season")
+
+# function to map plot for a species
+tmp.f <- function(df, target_species) {
+  df |> 
+    filter(spp_name == target_species) |> 
+    count(site_name, season) |> 
+    complete(site_name, season, fill = list(n=0)) |> 
+    ggplot(aes(x=site_name, y=n)) + 
+    geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
+    labs(
+      title = expression(paste("Count of", target_species, "samples by site and season")), 
+      x = "", y = "Number of samples", fill = "Season")
+}
+
+tmp.f(df = dat_csmi2015, target_species = "Alewife")
+
+
