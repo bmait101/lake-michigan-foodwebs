@@ -1,24 +1,39 @@
-# Prep RAW data
+#-----------------------------------------------#
+#
+# Prepare and explore SI data from CSMI 2015
+# Author: Dr. Bryan M Maitland
+# Email: bmaitland101@gamil.com
+#
+#----------------------------------------------#
 
-# libraries
+## Libraries
 library(tidyverse)
 library(here)
 source(here("R/xrefs.R"))
 
 
-# CSMI 2015 stable isotope ratio data ----
+## Data ----
 
-# read in flat data
+# CSMI 2015 raw data
 dat_csmi_2015 <- 
   readxl::read_xlsx(
     here("data-raw/CSMI-2015-data.xlsx"), 
     sheet = "Combined UF MED"
     )
 
-# clean columns via definitions sheet
+# Clean up columns using definitions tab in .xlsx file
 dat_csmi_2015 <- 
   dat_csmi_2015 |> 
-  select(-Depth_O, -Tray, -Lab, -Line, -`OP Notes`, -Comments, -Species_O) |> 
+  # remove columns we don't need
+  select(
+    -Depth_O,  # ???
+    -Tray,  # loading tray 
+    -Lab,  # ID of SI lab
+    -Line,  # column from SI lab
+    -`OP Notes`,  # comments from SI lab
+    -Comments,  # general comments
+    -Species_O  # ???
+    )|> 
   rename(
     sampleID = `Sample ID`, 
     sample_type = `F/I`,  # f=fish, i=invert, z=standard
@@ -54,7 +69,24 @@ dat_csmi_2015 <-
 dat_csmi_2015
 
 # save cleaned data
-write_rds(dat_csmi_2015, here("data/dat_csmi_2015.rds"))
+# write_rds(dat_csmi_2015, here("data/dat_csmi_2015.rds"))
+
+
+## Explore -----
+
+# Data overview
+dat_csmi_2015 |> skimr::skim()
+
+# Notes:
+# 1,792 rows, but only 1,619 unique sampleIDs... indicates duplicates
+# 169 samples (10%) with unknown sample type... could fix with species? 
+# 8 samples (1%) form unknown sites, probably the same 8 that don't have spp IDs
+# 241 samples do not have a matched up site name, so check cross reference.
+# 12 samples missing season information
+# Only 1% do not have isotope ratio data, but 15% don't have corrected C values
+
+
+
 
 
 
