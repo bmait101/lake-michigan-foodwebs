@@ -1,6 +1,6 @@
 #-----------------------------------------------#
 #
-# Prepare and explore SI data from CSMI 2015
+# Prepare and clean SI data from CSMI 2015
 # Author: Dr. Bryan M Maitland
 # Email: bmaitland101@gamil.com
 #
@@ -15,15 +15,21 @@ source(here("R/xrefs.R"))
 ## Data ----
 
 # CSMI 2015 raw data
-dat_csmi_2015 <- 
+dat_csmi2015_raw <- 
   readxl::read_xlsx(
     here("data-raw/CSMI-2015-data.xlsx"), 
     sheet = "Combined UF MED"
     )
 
-# Clean up columns using definitions tab in .xlsx file
-dat_csmi_2015 <- 
-  dat_csmi_2015 |> 
+## Data overview
+dat_csmi2015_raw |> skimr::skim()
+
+
+## Clean -----
+
+# Clean up columns
+dat_csmi2015 <- 
+  dat_csmi2015_raw |> 
   # remove columns we don't need
   select(
     -Depth_O,  # ???
@@ -65,28 +71,55 @@ dat_csmi_2015 <-
   relocate(spp_name, .after = spp_code) |> 
   mutate(across(2:7, as_factor))
 
-# check it  
-dat_csmi_2015
 
-# save cleaned data
-# write_rds(dat_csmi_2015, here("data/dat_csmi_2015.rds"))
+# Check it
+dat_csmi2015 |> skimr::skim()
 
+# Issues to fix:
+# 1. missing data
+# 2. duplicate samples
 
-## Explore -----
+## Missing data -----
 
-# Data overview
-dat_csmi_2015 |> skimr::skim()
+# Inspect samples with missing data
+dat_csmi2015 |> filter(is.na(sample_type)) |> distinct(spp_name)
+dat_csmi2015 |> filter(is.na(site_code))
+dat_csmi2015 |> filter(is.na(site_name))
+dat_csmi2015 |> filter(is.na(season))
+dat_csmi2015 |> filter(is.na(depth_m))
+dat_csmi2015 |> filter(is.na(d15N))
+dat_csmi2015 |> filter(is.na(d13C))
 
 # Notes:
-# 1,792 rows, but only 1,619 unique sampleIDs... indicates duplicates
-# 169 samples (10%) with unknown sample type... could fix with species? 
-# 8 samples (1%) form unknown sites, probably the same 8 that don't have spp IDs
-# 241 samples do not have a matched up site name, so check cross reference.
+# Samples with unknown type are all POM
+# Samples with missing site data also missing most other info
+#   also unclear what site "0" is... only three samples so removing them
 # 12 samples missing season information
-# Only 1% do not have isotope ratio data, but 15% don't have corrected C values
+
+# Remove samples with missing data and assogn POM sample types
+dat_csmi2015 <- dat_csmi2015 |> 
+  drop_na(d15N, d13C, depth_m, site_code, site_name, season) |> 
+  mutate(sample_type = coalesce(sample_type, "POM")) 
+
+# Check it
+dat_csmi2015 |> skimr::skim()
 
 
+## Duplicate samples -----
 
+# Table of all duplicate rows:
+(dat_csmi2015_dupes <- dat_csmi2015 |> janitor::get_dupes(sampleID))
 
+# Keep only one row for each duplicated sample
+dupes_to_add <- dat_csmi2015_dupes |> 
+  group_by(sampleID) |> 
+  slice_head(n = 1)
 
+# Remove duplicate rows and add back single observation
+dat_csmi2015 <- dat_csmi2015 |> 
+  filter(!sampleID %in% unique(dat_csmi2015_dupes$sampleID)) |> 
+  bind_rows(dupes_to_add) |> 
+  select(-dupe_count)
 
+# Check it
+dat_csmi2015 |> skimr::skim()
