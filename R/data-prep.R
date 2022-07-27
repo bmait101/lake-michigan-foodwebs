@@ -11,6 +11,8 @@ library(dplyr)
 library(tidyr)
 library(forcats)
 library(ggplot2); theme_set(theme_bw())
+library(patchwork)
+library(purrr)
 library(here)
 source(here("R/xrefs.R"))
 
@@ -24,13 +26,13 @@ dat_csmi2015_raw <-
     sheet = "Combined UF MED"
     )
 
-## Data overview
+# Data overview
 dat_csmi2015_raw |> skimr::skim()
 
 
 ## Clean -----
 
-# Clean up columns
+### Tidy columns ----
 dat_csmi2015 <- dat_csmi2015_raw |> 
   # remove columns we don't need
   select(
@@ -82,7 +84,7 @@ dat_csmi2015 |> skimr::skim()
 # 1. missing data
 # 2. duplicate samples
 
-## Missing data -----
+### Missing data -----
 
 # Inspect samples with missing data
 dat_csmi2015 |> filter(is.na(sample_type)) |> distinct(spp_name)
@@ -111,7 +113,7 @@ dat_csmi2015 <- dat_csmi2015 |>
 dat_csmi2015 |> skimr::skim()
 
 
-## Duplicate samples -----
+### Duplicate samples -----
 
 # Table of all duplicate rows:
 (dat_csmi2015_dupes <- dat_csmi2015 |> janitor::get_dupes(sampleID))
@@ -133,40 +135,54 @@ dat_csmi2015 |> skimr::skim()
 
 ## Visuals -----
 
-# Total samples by site and season
+### Samples by site and type ----
+dat_csmi2015 |> 
+  count(site_name, sample_type) |> 
+  complete(site_name, sample_type, fill = list(n=0)) |> 
+  ggplot(aes(x=site_name, y=n)) + 
+  geom_bar(aes(fill = sample_type), position = "dodge", stat="identity") + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(title = "Count of samples by site and sample type", 
+       x = "", y = "Number of samples", fill = "Sample Type")
+
+
+### Samples by site and season ----
 dat_csmi2015 |> 
   count(site_name, season) |> 
   complete(site_name, season, fill = list(n=0)) |> 
   ggplot(aes(x=site_name, y=n)) + 
   geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
+  scale_fill_brewer(palette = "Dark2") + 
   labs(title = "Count of samples by site and season", 
        x = "", y = "Number of samples", fill = "Season")
 
 
-# Samples by site and season, facet by species
-dat_csmi2015 |> 
-  count(site_code, season, spp_name) |> 
-  complete(site_code, season, spp_name, fill = list(n=0)) |> 
-  ggplot(aes(x=site_code, y=n)) + 
-  facet_wrap(vars(spp_name)) + 
-  geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
-  # scale_y_continuous(limits = c(0,10)) + 
-  labs(title = "Count of samples by site and season", 
-       x = "", y = "Number of samples", fill = "Season")
 
-# function to map plot for a species
-tmp.f <- function(df, target_species) {
+### Samples by site and season, by species ----
+plot.sample.counts <- function(df, target_species) {
   df |> 
     filter(spp_name == target_species) |> 
     count(site_name, season) |> 
     complete(site_name, season, fill = list(n=0)) |> 
     ggplot(aes(x=site_name, y=n)) + 
     geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
+    scale_fill_brewer(palette = "Dark2") + 
     labs(
-      title = expression(paste("Count of", target_species, "samples by site and season")), 
-      x = "", y = "Number of samples", fill = "Season")
+      title = paste(target_species), 
+      x = "", y = "No. samples", fill = "Season"
+      )
 }
+plot.sample.counts(df = dat_csmi2015, target_species = "Alewife")
+spp_to_plot <- c("Alewife", "Algae", "Amphipod")
+p.spp.sample.counts <- 
+  spp_to_plot |> 
+  map(~ plot.sample.counts(df = dat_csmi2015, target_species = .x))
 
-tmp.f(df = dat_csmi2015, target_species = "Alewife")
+p.spp.sample.counts[[1]] /
+  p.spp.sample.counts[[2]] /
+  p.spp.sample.counts[[3]] + 
+  plot_layout(guides = "collect")
+
+
 
 
