@@ -22,9 +22,13 @@ source(here("R/xrefs.R"))
 # CSMI 2015 raw data
 dat_csmi2015_raw <- 
   readxl::read_xlsx(
-    here("data/CSMI-2015-rawdata.xlsx"), 
+    here("data","CSMI-2015-rawdata.xlsx"), 
     sheet = "Combined UF MED"
     )
+
+# Site xref
+site_xref <- readr::read_csv(here("data", "site-xref.csv"))
+
 
 # Data overview
 dat_csmi2015_raw |> skimr::skim()
@@ -68,7 +72,7 @@ dat_csmi2015 <- dat_csmi2015_raw |>
       season == 3 ~ "Aug/Sep", 
       TRUE ~ NA_character_
     )) |> 
-  left_join(site_ref, by = "site_code") |> 
+  left_join(site_xref |> select(site_code, site_name), by = "site_code") |> 
   left_join(spp_ref, by = "spp_code") |> 
   relocate(d13C, .after = d15N) |> 
   relocate(site_name, .after = site_code) |> 
@@ -87,13 +91,13 @@ dat_csmi2015 |> skimr::skim()
 ### Missing data -----
 
 # Inspect samples with missing data
-dat_csmi2015 |> filter(is.na(sample_type)) |> distinct(spp_name)
-dat_csmi2015 |> filter(is.na(site_code))
-dat_csmi2015 |> filter(is.na(site_name))
-dat_csmi2015 |> filter(is.na(season))
-dat_csmi2015 |> filter(is.na(depth_m))
-dat_csmi2015 |> filter(is.na(d15N))
-dat_csmi2015 |> filter(is.na(d13C))
+# dat_csmi2015 |> filter(is.na(sample_type)) |> distinct(spp_name)
+# dat_csmi2015 |> filter(is.na(site_code))
+# dat_csmi2015 |> filter(is.na(site_name))
+# dat_csmi2015 |> filter(is.na(season))
+# dat_csmi2015 |> filter(is.na(depth_m))
+# dat_csmi2015 |> filter(is.na(d15N))
+# dat_csmi2015 |> filter(is.na(d13C))
 
 # Notes:
 # Samples with unknown type are all POM
@@ -135,6 +139,14 @@ dat_csmi2015 |> skimr::skim()
 
 ## Visuals -----
 
+# Map of sites
+library(sf)
+site_xref |> 
+  filter(!site_code=="Z.unk") |> 
+  st_as_sf(coords = c("lat", "long")) |> 
+  ggplot() + 
+  geom_sf()
+
 ### Samples by site and type ----
 dat_csmi2015 |> 
   count(site_name, sample_type) |> 
@@ -144,6 +156,10 @@ dat_csmi2015 |>
   scale_fill_brewer(palette = "Set1") + 
   labs(title = "Count of samples by site and sample type", 
        x = "", y = "Number of samples", fill = "Sample Type")
+
+# ~100 fish samples per site
+# ~50-75 inverts per site
+# ~10-15 POM per site
 
 
 ### Samples by site and season ----

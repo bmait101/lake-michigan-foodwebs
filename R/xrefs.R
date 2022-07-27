@@ -1,13 +1,4 @@
-# Site and species lists
-
-# Sites (from definitions tab of raw data file)
-site_ref <- tibble(
-  site_code = c(
-    "ARC", "LUD", "MAN", "MID", "RAC", "LARS", "SAU", "StB", "StJ", "WAK", "Z.unk"), 
-  site_name = c(
-    "Frankfort", "Ludington", "Manitowoc", "Midlake",  "Racine", "Deep Station", 
-    "Saugatuk", "Sturgeon Bay", "Saint Joes", "Waukegan", "Unknown")
-  )
+# Secies lists
 
 # Species 
 spp_ref <- tibble(
