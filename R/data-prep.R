@@ -116,14 +116,14 @@ dat_csmi2015 |> skimr::skim()
 ### Duplicate samples -----
 
 # Table of all duplicate rows:
-(dat_csmi2015_dupes <- dat_csmi2015 |> janitor::get_dupes(sampleID))
+dat_csmi2015_dupes <- dat_csmi2015 |> janitor::get_dupes(sampleID)
 
 # Keep only one row for each duplicated sample
 dupes_to_add <- dat_csmi2015_dupes |> 
   group_by(sampleID) |> 
   slice_head(n = 1)
 
-# Remove duplicate rows and add back single observation
+# Remove duplicate rows / add back single observation
 dat_csmi2015 <- dat_csmi2015 |> 
   filter(!sampleID %in% unique(dat_csmi2015_dupes$sampleID)) |> 
   bind_rows(dupes_to_add) |> 
