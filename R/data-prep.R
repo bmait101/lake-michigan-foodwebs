@@ -22,7 +22,7 @@ source(here("R/xrefs.R"))
 # CSMI 2015 raw data
 dat_csmi2015_raw <- 
   readxl::read_xlsx(
-    here("data-raw/CSMI-2015-rawdata.xlsx"), 
+    here("data/CSMI-2015-rawdata.xlsx"), 
     sheet = "Combined UF MED"
     )
 
