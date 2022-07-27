@@ -8,8 +8,8 @@ The landscape theory of food web architecture (LTWFA; [Rooney et al. 2008](https
 
 Collaborators: 
 
-* Fred Keppeler (UW-Madison CFL)
-* Olaf Jensen (UW-Madison CFL)
-* Joel Hoffman (EPA)
-* Bo Bunnell (USGS GLSC)
-* Scott McNaught (Central Michigan University)
+* [Fred Keppeler](https://fkeppeler.github.io/) (UW-Madison CFL)
+* [Olaf Jensen](https://jensen.limnology.wisc.edu/) (UW-Madison CFL)
+* [Joel Hoffman](https://www.researchgate.net/profile/Joel-Hoffman) (EPA)
+* [Bo Bunnell](https://www.usgs.gov/staff-profiles/david-b-bunnell) (USGS GLSC)
+* [Scott McNaught](http://people.se.cmich.edu/mcnau1as/) (Central Michigan University)
