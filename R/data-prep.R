@@ -113,9 +113,6 @@ dat_csmi2015 <- dat_csmi2015 |>
   droplevels() |> 
   mutate(sample_type = coalesce(sample_type, "POM")) 
 
-# Check it
-dat_csmi2015 |> skimr::skim()
-
 
 ### Duplicate samples -----
 
@@ -133,21 +130,14 @@ dat_csmi2015 <- dat_csmi2015 |>
   bind_rows(dupes_to_add) |> 
   select(-dupe_count)
 
-# Check it
+
+
+## Data overview -----
+
 dat_csmi2015 |> skimr::skim()
 
+# Samples by site and type
 
-## Visuals -----
-
-### Map of sites -----
-# library(sf)
-# site_xref |> 
-#   filter(!site_code=="Z.unk") |> 
-#   st_as_sf(coords = c("lat", "long")) |> 
-#   ggplot() + 
-#   geom_sf()
-
-### Samples by site and type ----
 dat_csmi2015 |> 
   count(site_name, sample_type) |> 
   complete(site_name, sample_type, fill = list(n=0)) |> 
@@ -162,9 +152,8 @@ dat_csmi2015 |>
 # ~10-15 POM per site
 
 
-### Samples by site and season ----
+# Samples by site and season, by type
 
-#### Facet by type
 dat_csmi2015 |> 
   count(site_name, season, sample_type) |> 
   complete(site_name, season, sample_type, fill = list(n=0)) |> 
@@ -176,8 +165,7 @@ dat_csmi2015 |>
        x = "", y = "Number of samples", fill = "Season") 
 
 
-
-#### Fish samples by site
+# Fish samples by site
 dat_csmi2015 |> 
   filter(sample_type == "fish") |>
   droplevels() |> 
@@ -188,34 +176,15 @@ dat_csmi2015 |>
   pivot_wider(names_from = "spp_code", values_from = "n")
 
 
-
-
-
-
-
-#### Plot by species
-plot.sample.counts <- function(df, target_species) {
-  df |> 
-    filter(spp_name == target_species) |> 
-    count(site_name, season) |> 
-    complete(site_name, season, fill = list(n=0)) |> 
-    ggplot(aes(x=site_name, y=n)) + 
-    geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
-    scale_fill_brewer(palette = "Dark2") + 
-    labs(
-      title = paste(target_species), 
-      x = "", y = "No. samples", fill = "Season"
-      )
-}
-# plot.sample.counts(df = dat_csmi2015, target_species = "Alewife")
-spp_to_plot <- c("Alewife", "Algae", "Amphipod")
-p.spp.sample.counts <- spp_to_plot |> 
-  map(~ plot.sample.counts(df = dat_csmi2015, target_species = .x))
-
-p.spp.sample.counts[[1]] /
-  p.spp.sample.counts[[2]] /
-  p.spp.sample.counts[[3]] + 
-  plot_layout(guides = "collect")
+# Fish samples by depth
+dat_csmi2015 |> 
+  filter(sample_type == "fish") |>
+  droplevels() |> 
+  count(site_name, depth_m) |> 
+  complete(site_name, depth_m, fill = list(n=0)) |> 
+  mutate(across(where(is.factor), as.character)) |> 
+  arrange(site_name, depth_m) |> 
+  pivot_wider(names_from = "depth_m", values_from = "n")
 
 
 
