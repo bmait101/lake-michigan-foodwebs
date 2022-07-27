@@ -22,7 +22,7 @@ source(here("R/xrefs.R"))
 # CSMI 2015 raw data
 dat_csmi2015_raw <- 
   readxl::read_xlsx(
-    here("data-raw/CSMI-2015-data.xlsx"), 
+    here("data-raw/CSMI-2015-rawdata.xlsx"), 
     sheet = "Combined UF MED"
     )
 
@@ -147,6 +147,8 @@ dat_csmi2015 |>
 
 
 ### Samples by site and season ----
+
+#### Facet by species (a bit tight)
 dat_csmi2015 |> 
   count(site_name, season) |> 
   complete(site_name, season, fill = list(n=0)) |> 
@@ -156,9 +158,7 @@ dat_csmi2015 |>
   labs(title = "Count of samples by site and season", 
        x = "", y = "Number of samples", fill = "Season")
 
-
-
-### Samples by site and season, by species ----
+#### Plot by species
 plot.sample.counts <- function(df, target_species) {
   df |> 
     filter(spp_name == target_species) |> 
@@ -172,10 +172,9 @@ plot.sample.counts <- function(df, target_species) {
       x = "", y = "No. samples", fill = "Season"
       )
 }
-plot.sample.counts(df = dat_csmi2015, target_species = "Alewife")
+# plot.sample.counts(df = dat_csmi2015, target_species = "Alewife")
 spp_to_plot <- c("Alewife", "Algae", "Amphipod")
-p.spp.sample.counts <- 
-  spp_to_plot |> 
+p.spp.sample.counts <- spp_to_plot |> 
   map(~ plot.sample.counts(df = dat_csmi2015, target_species = .x))
 
 p.spp.sample.counts[[1]] /
