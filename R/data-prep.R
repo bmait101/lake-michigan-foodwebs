@@ -78,7 +78,7 @@ dat_csmi2015 <- dat_csmi2015_raw |>
   relocate(site_name, .after = site_code) |> 
   relocate(spp_name, .after = spp_code) |> 
   mutate(across(2:7, as_factor)) |> 
-  mutate(season = fct_relevel(season, c('May', 'Jun/Jul', 'Aug/Sep')))
+  mutate(season = fct_relevel(season, c('May', 'Jun/Jul', 'Aug/Sep'))) 
 
 
 # Check it
@@ -139,13 +139,13 @@ dat_csmi2015 |> skimr::skim()
 
 ## Visuals -----
 
-# Map of sites
-library(sf)
-site_xref |> 
-  filter(!site_code=="Z.unk") |> 
-  st_as_sf(coords = c("lat", "long")) |> 
-  ggplot() + 
-  geom_sf()
+### Map of sites -----
+# library(sf)
+# site_xref |> 
+#   filter(!site_code=="Z.unk") |> 
+#   st_as_sf(coords = c("lat", "long")) |> 
+#   ggplot() + 
+#   geom_sf()
 
 ### Samples by site and type ----
 dat_csmi2015 |> 
@@ -164,15 +164,34 @@ dat_csmi2015 |>
 
 ### Samples by site and season ----
 
-#### Facet by species (a bit tight)
+#### Facet by type
 dat_csmi2015 |> 
-  count(site_name, season) |> 
-  complete(site_name, season, fill = list(n=0)) |> 
+  count(site_name, season, sample_type) |> 
+  complete(site_name, season, sample_type, fill = list(n=0)) |> 
   ggplot(aes(x=site_name, y=n)) + 
+  facet_grid(rows = vars(sample_type)) + 
   geom_bar(aes(fill = season), position = "dodge", stat="identity") + 
   scale_fill_brewer(palette = "Dark2") + 
   labs(title = "Count of samples by site and season", 
-       x = "", y = "Number of samples", fill = "Season")
+       x = "", y = "Number of samples", fill = "Season") 
+
+
+
+#### Fish samples by site
+dat_csmi2015 |> 
+  filter(sample_type == "fish") |>
+  droplevels() |> 
+  count(site_name, spp_code) |> 
+  complete(site_name, spp_code, fill = list(n=0)) |> 
+  mutate(across(where(is.factor), as.character)) |> 
+  arrange(site_name, spp_code) |> 
+  pivot_wider(names_from = "spp_code", values_from = "n")
+
+
+
+
+
+
 
 #### Plot by species
 plot.sample.counts <- function(df, target_species) {

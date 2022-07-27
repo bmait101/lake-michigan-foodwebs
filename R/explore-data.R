@@ -5,7 +5,7 @@
 
 # All data
 dat_csmi2015 |> 
-  ggplot(aes(x = d13Cc2, y = d15N)) + 
+  ggplot(aes(x = d13C, y = d15N)) + 
   geom_point(aes(color = sample_type))
   
 # Fish
