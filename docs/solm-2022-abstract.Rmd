@@ -1,0 +1,16 @@
+---
+title: "Abstract for SOLM 2022 Meeting"
+author: "Bryan Maitland, Fred Keppeler, Joel Hoffman, Olaf Jensen, Bo Bunnell, Scott McNaught"
+date: "2022-07-15"
+output: html_document
+---
+
+Meeting: Traverse City, MI, 24-26 October
+
+Target session: Habitat Heterogeneity in LM: Implications for Food Webs, Fish and Fisheries 
+
+### Title: Body size and Lake Michigan food webs
+
+### Abstract (300 words):
+
+The landscape theory of food web architecture (LTWFA) describes relationships among animal body size, mobility, and coupling of energy channels from heterogeneous habitats. As such, it can help predict which species are likely to play a critical role in connecting different parts of a food web. However, empirical tests of the LTWFA are rare and support differs among terrestrial, freshwater, and marine systems. Further. the LTWFA has not yet been tested in the Great Lakes and it remains unclear whether the theory applies in highly invaded ecosystems such as Lake Michigan. Here, we will test predictions of the LTWFA by quantifying links among animal body size, trophic position, and the coupling of energy channels from heterogeneous habitats using carbon and nitrogen stable isotope ratio data from organisms throughout the Lake Michigan food web. Our finding will allow managers to identify which species play key roles in coupling habitats and food web compartments within the lake. Because energy transfer among habitats and diverse basal production sources promote stable food webs and species diversity, our findings will provide a management-relevant snapshot of the state of the Lake Michigan food web. 
