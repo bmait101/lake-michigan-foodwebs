@@ -29,3 +29,7 @@ p.dat |>
   stat_ellipse(geom = "polygon",
                aes(fill = spp_code), 
                alpha = 0.2)
+
+
+
+# delta values vs depth by species
