@@ -2,7 +2,7 @@
 #
 # Prepare and clean SI data from CSMI 2015
 # Author: Dr. Bryan M Maitland
-# Email: bmaitland101@gamil.com
+# Email: bmaitland101@gmail.com
 #
 #----------------------------------------------#
 
@@ -153,7 +153,6 @@ dat_csmi2015 |>
 
 
 # Samples by site and season, by type
-
 dat_csmi2015 |> 
   count(site_name, season, sample_type) |> 
   complete(site_name, season, sample_type, fill = list(n=0)) |> 
@@ -165,7 +164,7 @@ dat_csmi2015 |>
        x = "", y = "Number of samples", fill = "Season") 
 
 
-# Fish samples by site
+# Fish species samples by site
 dat_csmi2015 |> 
   filter(sample_type == "fish") |>
   droplevels() |> 
@@ -180,11 +179,12 @@ dat_csmi2015 |>
 dat_csmi2015 |> 
   filter(sample_type == "fish") |>
   droplevels() |> 
-  count(site_name, depth_m) |> 
-  complete(site_name, depth_m, fill = list(n=0)) |> 
+  count(site_name, depth_m, spp_code) |> 
+  complete(site_name, depth_m, spp_code, fill = list(n=0)) |> 
   mutate(across(where(is.factor), as.character)) |> 
-  arrange(site_name, depth_m) |> 
-  pivot_wider(names_from = "depth_m", values_from = "n")
+  arrange(site_name, depth_m, spp_code) |> 
+  pivot_wider(names_from = "spp_code", values_from = "n") |> 
+  print(n = Inf)
 
 
 
