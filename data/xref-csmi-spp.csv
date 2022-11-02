@@ -1,0 +1,38 @@
+spp_code,species,functional_group
+AIP,Alewife,Alewife plankton
+ALE,Alewife,Alewife
+ALEl,Alewife,Alewife_lg
+ALEs,Alewife,Alewife_sm
+ALG,Algae,Algae
+AMP,Amphipod,Amphipod
+BIP,Bloater,Bloater plankton
+BLO,Bloater,Bloater
+BLOl,Bloater,Bloater_lg
+BLOs,Bloater,Bloater_sm
+BUT,Burbot,Burbot
+BYT,Bythotrephes,Bythotrephes
+CHR,Chironomids,Chironomids
+CRA,Crayfish,Crayfish
+DIP,Deep Water Sculpin,Deep Water Sculpin plankton
+DWS,Deep Water Sculpin,Deep Water Sculpin
+HA,Hemimysis,Hemimysis adult
+HJ,Hemimysis,Hemimysis juvenile
+LAT,Lake trout,Lake trout
+LWF,Lake whitefish,Lake whitefish
+MUS,Dreissenids,Dreissenids
+MUSl,Dreissenids,Dreissenids_lg
+MUSm,Dreissenids,Dreissenids_med
+MUSs,Dreissenids,Dreissenids_sm
+MYS,Mysis,Mysis
+OLG,Oligochaete,Oligochaete
+POM,POM,POM
+RAS,Rainbow Smelt,Rainbow Smelt
+ROG,Round Goby,Round Goby
+SMSl,Slimy Sculpin,Slimy Sculpin_lg
+SMSs,Slimy Sculpin,Slimy Sculpin_sm
+SPS,Spottail Shiner,Spottail Shiner
+WHS,White Sucker,White Sucker
+YEP,Yellow Perch,Yellow Perch
+ZOP,Zooplankton,Zooplankton
+ZOP153,Zooplankton,Zooplankton153u
+ZOP63,Zooplankton,Zooplankton163u
