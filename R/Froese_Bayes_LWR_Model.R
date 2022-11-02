@@ -1,10 +1,11 @@
 #-----------------------------------------------#
 # Bayesian L-W regression model (Froese et al. 2014)
-# Email: bmaitland101@gmail.com
+# Modified from Fred Keppeller
+# Bryan Maitland
 #----------------------------------------------#
 
 # Libraries
-pacman::p_load(here, rfishbase, data.table, R2jags)
+pacman::p_load(here, rfishbase, data.table, R2jags, dplyr)
 
 # Prep -----
 
@@ -16,8 +17,11 @@ List_fish <- read.csv(here("data","species-list.csv"))
 # List_fish <- List_fish_shape[,"Species"]
 
 # Extract length-weight relationships available from fishbase
+# data_LL <- length_length()
+# data_LL <- subset(data_LL, Species %in% List_fish$Species)
 data_LW <- length_weight()
 data_LW <- subset(data_LW, Type=="TL")  # Use only TL
+# data_LW <- subset(data_LW, Type=="TL" | is.na(Type))
 
 # Add shape to the LWR table and convert to factor
 data_LW <- merge(data_LW, shape_fish, by="Species")
@@ -52,7 +56,7 @@ data_LW <- merge(data_LW, data, by="Species")
 data_LW$Species <- gsub(" ", "_", data_LW$Species)
 
 # Organize fish species table
-# List_fish <- data.frame(Species=List_fish)
+List_fish <- data.frame(Species=List_fish)
 Genus <- data.frame(
   do.call(
     'rbind', strsplit(as.character(List_fish$Species), ' ', fixed=TRUE)
@@ -68,44 +72,51 @@ List_fish <- List_fish |>
     Ep_specific == "thompsonii" ~ "elongated", 
     Ep_specific == "hudsonius" ~ "fusiform / normal", 
     TRUE ~ Bshape))
+List_fish <- List_fish |> slice(-18)
 
 #-------------------------#
 # BAYESIAN ANALYSIS ----
 #-------------------------#
 
 RESULTS <- matrix(nrow=nrow(List_fish),ncol=15)
-colnames(RESULTS)<-c("Target Species",
-                     "Number of target species observations",
-                     "Number of related species",
-                     "Number of related species observations",	
-                     "Body shape", "mean loga Related species",	
-                     "sd loga Related Species",
-                     "mean b Related species",	"sd b Related species",
-                     "mean loga Target species",	"sd loga Target species",	
-                     "mean b Target species",	"sd b Target species",
-                     "95% HDI of a",	"95% HDI of b")
+colnames(RESULTS)<-c(
+  "Target Species",
+  "Number of target species observations",
+  "Number of related species",
+  "Number of related species observations",	
+  "Body shape", "mean loga Related species",	
+  "sd loga Related Species",
+  "mean b Related species",	
+  "sd b Related species",
+  "mean loga Target species",	
+  "sd loga Target species",	
+  "mean b Target species",	
+  "sd b Target species",
+  "95% HDI of a",	
+  "95% HDI of b"
+  )
 
 # i = 7
-pdf(here("out", "LW", "Post_param.pdf"), width=10)
+pdf(here("out", "models", "lw", "Post_param.pdf"), width=10)
 par(mfrow=c(1,2))
 for (i in 1:nrow(List_fish)) {
-  Genus= as.character(List_fish$Genus[i])  
-  Species= as.character(List_fish$Ep_specific[i])
+  Genus = as.character(List_fish$Genus[i])  
+  Species = as.character(List_fish$Ep_specific[i])
   Data = data_LW
   DataGS = Data[Data$Genus == Genus & Data$Ep_specific == Species,] # select data for Species
   Family = species(as.character(List_fish$Species[i]))$FamCode
   DataFam = subset(Data,FamCode.y == Family)
   Bshape = as.character(List_fish$Bshape[i]) # one of: "eel-like", "elongated", "fusiform / normal", "short & deep"
   
-  if (Bshape == "eel-like") { # eel-like prior for log(a) and b
-    ELL<-subset(data_LW,Bshape=="eel-like")
-    prior_sd_log10a<- sd(log10(ELL$a))
-    prior_tau_log10a = 1/prior_sd_log10a^2
-    prior_mean_b<- mean(ELL$b)
-    prior_sd_b<- sd(ELL$b)
-    prior_tau_b <- 1/prior_sd_b^2
-    }
-  if (Bshape == "elongated") { # elongate prior for log(a) and b
+  # if (Bshape == "eel-like") { # eel-like prior for log(a) and b
+  #   ELL<-subset(data_LW,Bshape=="eel-like")
+  #   prior_sd_log10a<- sd(log10(ELL$a))
+  #   prior_tau_log10a = 1/prior_sd_log10a^2
+  #   prior_mean_b<- mean(ELL$b)
+  #   prior_sd_b<- sd(ELL$b)
+  #   prior_tau_b <- 1/prior_sd_b^2
+  #   }
+  if(Bshape == "elongated") { # elongate prior for log(a) and b
     ELONGATED<-subset(data_LW,Bshape=="elongated")
     prior_mean_log10a<- mean(log10(ELONGATED$a))
     prior_sd_log10a<- sd(log10(ELONGATED$a))
@@ -114,7 +125,7 @@ for (i in 1:nrow(List_fish)) {
     prior_sd_b<- sd(ELONGATED$b)
     prior_tau_b <- 1/prior_sd_b^2
     }
-  if (Bshape == "fusiform / normal") { # fusiform prior for log(a) and b
+  if(Bshape == "fusiform / normal") { # fusiform prior for log(a) and b
     FUSIFORM<-subset(data_LW,Bshape=="fusiform / normal")
     prior_mean_log10a<- mean(log10(FUSIFORM$a))
     prior_sd_log10a<- sd(log10(FUSIFORM$a))
@@ -123,7 +134,7 @@ for (i in 1:nrow(List_fish)) {
     prior_sd_b<- sd(FUSIFORM$b)
     prior_tau_b <- 1/prior_sd_b^2
     }
-  if (Bshape == "short and / or deep") { # short & deep prior for log(a) and b
+  if(Bshape == "short and / or deep") { # short & deep prior for log(a) and b
     SHORT_DEEP<-subset(data_LW,Bshape=="short and / or deep")
     prior_mean_log10a<- mean(log10(SHORT_DEEP$a))
     prior_sd_log10a<- sd(log10(SHORT_DEEP$a))
@@ -132,7 +143,7 @@ for (i in 1:nrow(List_fish)) {
     prior_sd_b<- sd(SHORT_DEEP$b)
     prior_tau_b <- 1/prior_sd_b^2
     }
-  if (nrow(DataFam)==0 & nrow(DataGS)==0 ){
+  if(nrow(DataFam)==0 & nrow(DataGS)==0 ){
     RESULTS[i,1]<- paste(Genus,Species,sep=" ") 
     RESULTS[i,2]<-0
     RESULTS[i,3]<-0
@@ -142,9 +153,10 @@ for (i in 1:nrow(List_fish)) {
     RESULTS[i,12]<-prior_mean_b
     RESULTS[i,13]<-prior_sd_b
   } 
-  else {
+  else{
     
     ### Define data ----
+    
     Keep = which(DataFam$Score>0) # exclude studies with zero Score or with other body shapes
     wts = DataFam$Score[Keep]  # Un-normalized weights (so that Cov is comparable among analyses)
     a = DataFam$a[Keep] # vector with estimates of parameter 'a' from selected studies
@@ -172,6 +184,7 @@ for (i in 1:nrow(List_fish)) {
     SD_muGS_b = 6498
     
     ### Define JAGS model  ----
+    
     Model = "
     model {               
     
@@ -228,16 +241,18 @@ for (i in 1:nrow(List_fish)) {
     "
     
     # Write JAGS model 
-    File <- glue::glue(here("out", "LW"), "/model_", List_fish$Species[i], sep="")
+    File <- glue::glue(here("out", "models", "lw"), "/model_", List_fish$Species[i], sep="")
     cat(Model, file=glue::glue(File,"_dmnorm.bug",sep=""))
     
     ### JAGS settings ----
+    
     Nchains = 3	# number of MCMC chains to be used in JAGS
     Nburnin = 1e4 # number of burn-in iterations, to be discarded; 1e4 = 10000 iterations for burn-in
     Niter = 3e4 # number of iterations after burn-in; 3e4 = 30000 iterations
     Nthin = 1e1 # subset of iterations to be used for analysis; 1e1 = every 10th iteration 
     
-    # Run JAGS -----
+    ### Run JAGS -----
+    
     # define data to be passed on in DataJags; 
     # determine parameters to be returned in Param2Save; 
     # call JAGS with function Jags()
@@ -335,5 +350,5 @@ for (i in 1:nrow(List_fish)) {
   } # END ALL
 dev.off()
 
-write.table (RESULTS, file= here("out", "LW", "results_L_W_Bayes.txt"))
+write.table (RESULTS, file= here("out", "models", "lw", "results_L_W_Bayes.txt"))
 
