@@ -1,267 +1,421 @@
-# Loan and prep datasets
+# Loan and clean datasets
 
-# libraries
+## Prep ========================================================================
+
+# Libraries
 pacman::p_load(here, tidyverse, readxl, janitor)
 
-xref_spp <- read.csv(here("data", "xref-spp.csv"))
+# Source functions
+source(here("R", "fx_clean.R"))
 
-## CSMI 2015 ==================================================
+# Xref table for CSMI species codes
+xref_spp <- 
+  read.csv(here("data", "xref-spp.csv")) |> 
+  mutate_if(is.character, str_to_lower)
 
-# Load data
-# provided as an xlsx file, I extracted metadata separately
-raw_csmi2015 <- readxl::read_xlsx(
+
+
+## UWM 2002 fish ===============================================================
+
+raw_uwm_2002_fish <- read_xlsx(
+  here("data","raw_turschak_maitland_query.xlsx"), 
+  sheet = "2002-2003 SIA Data"
+)
+
+df_uwm_2002_fish <- raw_uwm_2002_fish |> 
+  cleans_names_and_caps() |> 
+  select(
+    sample_id,
+    date, 
+    site_code = port_location, 
+    depth_m, 
+    common_name = species, 
+    length_mm = tl,
+    d15n, 
+    d13c, 
+    ug_n = n_ug, 
+    ug_c = c_ug
+  ) 
+
+df_uwm_2002_fish <- df_uwm_2002_fish |> 
+  mutate(
+    dataset = "uwm_2002_2003",
+    weight_g = NA, 
+    taxon_group = NA, 
+    sample_type = case_when(
+      common_name %in% c("Quagga", "Zebra", "Zooplankton") ~ "invert", 
+      TRUE ~ "fish"
+    ),
+    date = lubridate::as_date(date),
+    year = lubridate::year(date), 
+    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
+    lake_region = case_when(
+      site_code %in% c(
+        "north manitou", "northeast reef", "pyramid point", "south manitou 2") ~ "NE", 
+      site_code %in% c("door county") ~ "NW", 
+      site_code %in% c("s1", "s2", "sheboygan reef") ~ "SE", 
+      site_code %in% c(
+        "atwater", "east reef", "east shore of l michigan", 
+        "east shored of l michigan", "fox point", "fox point offshore", 
+        "linnwood", "milwaukee offshore", "milwaukee south", "port washington", 
+        "s3", "s4", "sheboygan nearshore", "sheboygan offshore", 
+        "whitefish bay", "wind point") ~ "SW" 
+    ), 
+    cn = ug_c / ug_n
+  ) |>
+  select(-ug_c, -ug_n) |> 
+  mutate(
+    season = case_when(
+      season == "1" ~ "spring", 
+      season == "2" ~ "summer", 
+      season == "3" ~ "fall", 
+      season == "4" ~ "winter",
+      TRUE ~ season)) |> 
+  relocate(dataset, .before = sample_id) |> 
+  relocate(c(year, season), .after = date) |> 
+  relocate(lake_region, .after = season) |> 
+  relocate(sample_type, .after = depth_m) |> 
+  relocate(cn, .after = d13c) |> 
+  relocate(weight_g, .after = length_mm) |> 
+  relocate(taxon_group, .after = common_name)
+
+
+## UWM 2010 fish ===============================================================
+
+raw_uwm_2010_fish <- read_xlsx(
+  here("data","raw_bootsma_2010_2011_fish.xlsx"), 
+  sheet = "FishSIResults2010_2011"
+)
+
+df_uwm_2010_fish <- raw_uwm_2010_fish |> 
+  cleans_names_and_caps() |> 
+  select(
+    sample_id = sample_num,
+    date, 
+    site_code = site_name, 
+    depth_m = site_depth_general, 
+    common_name = fish_species, 
+    length_mm = fish_tl,
+    d15n = corrected_n_d_29_28, 
+    d13c = corrected_c_d_13_12, 
+    ug_n, 
+    ug_c
+  ) 
+
+df_uwm_2010_fish <- df_uwm_2010_fish |> 
+  mutate(
+    dataset = "uwm_2010_2011",
+    sample_type = "fish", 
+    date = lubridate::as_date(date),
+    year = lubridate::year(date), 
+    taxon_group = NA, 
+    weight_g = NA, 
+    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
+    depth_m = case_when(
+      depth_m == "shallow" ~ 3, 
+      depth_m == "intermediate" ~ 8, 
+      depth_m == "deep" ~ 15, 
+      depth_m == "various" ~ 8
+    ),
+    lake_region = case_when(
+      site_code %in% c("6r") ~ "NE", 
+      site_code %in% c("5r") ~ "NW", 
+      site_code %in% c("1s", "1r", "2s", "2r", "3r") ~ "SE", 
+      site_code %in% c("3s", "4s") ~ "SW" ), 
+    cn = ug_c / ug_n
+  ) |>
+  select(-ug_c, -ug_n) |> 
+  mutate(
+    season = case_when(
+      season == "1" ~ "spring", 
+      season == "2" ~ "summer", 
+      season == "3" ~ "fall", 
+      TRUE ~ season)) |> 
+  mutate(year = case_when(
+    sample_id == "10micitydnr" ~ 2010, 
+    TRUE ~ year
+  )) |> 
+  relocate(dataset, .before = sample_id) |> 
+  relocate(c(year, season), .after = date) |> 
+  relocate(lake_region, .after = season) |> 
+  relocate(sample_type, .after = depth_m) |> 
+  relocate(cn, .after = d13c) |> 
+  relocate(weight_g, .after = length_mm) |> 
+  relocate(taxon_group, .after = common_name)
+
+
+## UWM 2010 baselines ==========================================================
+
+# path <- here("data", "raw_bootsma_2010_baselines.xlsx") 
+# 
+# path %>% 
+#   excel_sheets() %>% 
+#   set_names() %>% 
+#   map(read_excel, path = path)
+
+
+## NPS 2015 salmonids ==========================================================
+
+raw_nps_2015_salmonids <- read_csv(here("data", "raw_Salmonine_Isotope_2015.csv"))
+
+df_nps_2015_salmonids <- raw_nps_2015_salmonids |> 
+  cleans_names_and_caps() |> 
+  select(
+    sample_id = id,
+    date = collection_date, 
+    lake_region = quadrant, 
+    site_code = port_where_fish_was_landed, 
+    common_name = species, 
+    length_mm = tl_mm,
+    weight_kg = wt_kg,
+    d15n = d15n_14n, 
+    d13c = d13c_12c, 
+    cn
+  ) 
+
+df_nps_2015_salmonids <- df_nps_2015_salmonids |> 
+  mutate(
+    dataset = "nps_2015",
+    sample_id = as.character(sample_id),
+    sample_type = "fish", 
+    date = lubridate::mdy(date),
+    year = lubridate::year(date), 
+    depth_m = NA,
+    taxon_group = NA, 
+    weight_g = weight_kg * 1000, 
+    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
+    lake_region = case_when(
+      lake_region == "northeast" ~ "NE", 
+      lake_region == "northwest" ~ "NW", 
+      lake_region == "southeast" ~ "SE", 
+      lake_region == "southwest" ~ "SW" 
+      ), 
+    common_name = case_when(
+      common_name == "bnt" ~ "brown trout",
+      common_name == "chs" ~ "chinook salmon",
+      common_name == "cos" ~ "coho salmon",
+      common_name == "lat" ~ "lake trout",
+      common_name == "rbt" ~ "rainbow trout"
+      )
+    ) |>
+  select(-weight_kg) |> 
+  mutate(
+    season = case_when(
+      season == "1" ~ "spring", 
+      season == "2" ~ "summer", 
+      season == "3" ~ "fall", 
+      season == "4" ~ "winter", 
+      TRUE ~ season)) |> 
+  relocate(dataset, .before = sample_id) |> 
+  relocate(c(year, season), .after = date) |> 
+  relocate(lake_region, .after = season) |> 
+  relocate(sample_type, .after = depth_m) |> 
+  relocate(cn, .after = d13c) |> 
+  relocate(weight_g, .after = length_mm) |> 
+  relocate(taxon_group, .after = common_name)
+
+
+
+## GLFT 2016 salmonids =========================================================
+
+raw_glft_2016_fish <- read_xlsx(
+  here("data","raw_turschak_maitland_query.xlsx"), 
+  sheet = "2016_GLFT_Data_Query"
+)
+
+df_glft_2016_fish <- raw_glft_2016_fish |> 
+  cleans_names_and_caps() |> 
+  select(
+    sample_id,
+    date, 
+    site_code = port_location, 
+    depth_m, 
+    common_name = species, 
+    length_mm = tl,
+    d15n, 
+    d13c, 
+    ug_n = n_ug, 
+    ug_c = c_ug
+  ) 
+
+df_glft_2016_fish <- df_glft_2016_fish |> 
+  mutate(
+    dataset = "glft_2016",
+    weight_g = NA, 
+    taxon_group = NA, 
+    sample_type = "fish",
+    date = lubridate::as_date(date),
+    year = lubridate::year(date), 
+    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
+    lake_region = case_when(
+      site_code %in% c(
+        "arcadia", "charlevoix", "elk rapids", "frankfort", "little traverse bay",
+        "ludington", "manistee"
+        ) ~ "NE", 
+      site_code %in% c(
+        "algoma", "cardy's reef", "clay banks", "kewaunee", "manitowoc",
+        "strugeon bay", "sturgeon bay", "two rivers"
+        ) ~ "NW", 
+      site_code %in% c(
+        "holland", "michigan city", "muskegon", "south haven", "st joseph"
+        ) ~ "SE", 
+      site_code %in% c(
+        "east chicago", "burns harbor", "grand haven", "kenosha", "milwaukee", 
+        "port washington", "racine", "sheboygan", "waukegan"
+      ) ~ "SW", 
+      TRUE ~ NA_character_
+    ), 
+    cn = ug_c / ug_n
+  ) |>
+  select(-ug_c, -ug_n) |> 
+  mutate(depth_m = as.numeric(depth_m)) |> 
+  mutate(
+    season = case_when(
+      season == "1" ~ "spring", 
+      season == "2" ~ "summer", 
+      season == "3" ~ "fall", 
+      season == "4" ~ "winter",
+      TRUE ~ season)) |> 
+  relocate(dataset, .before = sample_id) |> 
+  relocate(c(year, season), .after = date) |> 
+  relocate(lake_region, .after = season) |> 
+  relocate(sample_type, .after = depth_m) |> 
+  relocate(cn, .after = d13c) |> 
+  relocate(weight_g, .after = length_mm) |> 
+  relocate(taxon_group, .after = common_name)
+
+
+
+## CSMI 2015 ===================================================================
+
+raw_csmi_2015 <- read_xlsx(
   here("data","raw-CSMI-2015.xlsx"), 
   sheet = "Combined UF MED"
   )
 
-# load xref tables I made from metadata
-# xref_csmi_sites <- read.csv(here("data", "xref-csmi-sites.csv"))
-
-
-## Initial clean
-
-# Get rid of columns
-df_csmi <- raw_csmi2015 |> 
+df_csmi_2015 <- raw_csmi_2015 |> 
+  cleans_names_and_caps() |> 
   select(
-    -Depth_O,     # unknown column, no metadata
-    -Tray,        # sample loading tray for isotope analysis 
-    -Lab,         # ID of SI lab: EPA Duluth Minnesota (MED), U of Florida (UF)
-    -Line,        # column from SI lab
-    -`OP Notes`,  # comments from SI lab
-    -Comments,    # general comments from lab,
-    -`wt%N`,
-    -`wt%C`, 
-    -d13Cc, # Lipid corrected values via Hoffman
-    -d13Cc2, # Lipid corrected values: inverts-Smynek, fish-Hoffman
-    -Species
+    sample_id, 
+    season,
+    site_code = site,
+    depth_m,
+    sample_type = f_i,
+    spp_code = species_o, 
+    d15n, 
+    d13c = d13cb,
+    cn = c_n
     )
 
-# Fix some names
-df_csmi <- df_csmi |> 
-  rename(
-    sample_id = `Sample ID`, 
-    sample_type = `F/I`,      # f=fish, i=invert, z=standard
-    site = Site,         # 3-letter site codes codes
-    season = Season,          # 1=may, 2=june/july, 3=aug/sep
-    depth = `Depth(m)`,     # depth in meters
-    spp_code = Species_O,    # detailed species subgroup linked to my xref table
-    d13C = d13Cb,     # bulk d13C
-    # d13C_c1 = d13Cc,   # Lipid corrected values via Hoffman
-    # d13C_c2 = d13Cc2,  # Lipid corrected values: inverts-Smynek, fish-Hoffman
-    cn = `C:N`,
-    )
-
-# Add xref
-df_csmi <- df_csmi |> 
+df_csmi_2015 <- df_csmi_2015 |> 
   mutate(
     dataset = "csmi_2015",
     length_mm = NA, 
+    weight_g = NA, 
+    date = NA,
     year = 2015,  
-    area = case_when(
-      site %in% c("ARC", "LUD") ~ "NEM", 
-      site %in% c("SAU", "StJ") ~ "SEM", 
-      site %in% c("StB", "MAN") ~ "NWM", 
-      site %in% c("RAC", "WAK") ~ "SWM"
+    lake_region = case_when(
+      site_code %in% c("arc", "luc") ~ "NE", 
+      site_code %in% c("sau", "stj") ~ "SE", 
+      site_code %in% c("stb", "man") ~ "NW", 
+      site_code %in% c("rac", "wak") ~ "SW"
       ),
     spp_code = ifelse(spp_code=="LTR", "LAT", spp_code),
     sample_type = case_when(
-      sample_type == "F" ~ "fish", 
-      sample_type == "I" ~ "invert", 
+      sample_type == "f" ~ "fish", 
+      sample_type == "i" ~ "invert", 
       TRUE ~ NA_character_
       ), 
     season = case_when(
-      season == "1" ~ "Spring", 
-      season == "2" ~ "Summer", 
-      season == "3" ~ "Fall", 
+      season == "1" ~ "spring", 
+      season == "2" ~ "summer", 
+      season == "3" ~ "fall", 
+      season == "4" ~ "winter",
       TRUE ~ season)
     ) |> 
-  left_join(xref_spp, by = "spp_code") 
-
-
-# Clean up
-df_csmi <- df_csmi |> 
+  mutate(sample_type = coalesce(sample_type, "POM")) |>
+  mutate(sample_type = case_when(
+    spp_code == "alg" ~ "algae", 
+    TRUE ~ sample_type
+  )) |> 
+  left_join(xref_spp, by = "spp_code") |> 
+  select(-spp_code) |> 
   relocate(dataset, .before = sample_id) |>
-  relocate(c(spp_code, species), .after = sample_id) |>
-  relocate(functional_group, .after = species) |>
-  relocate(year, .after = functional_group) |>
-  relocate(season, .after = year) |> 
-  relocate(c(area,site), .after = season) |> 
-  relocate(depth, .after = site) |> 
-  mutate(sample_type = coalesce(sample_type, "POM")) 
-# |> 
-#   mutate(sample_type = ifelse(spp_code=="ALG", "Algae", sample_type))
+  relocate(c(common_name, taxon_group), .after = sample_type) |>
+  relocate(c(date, year), .before = season) |>
+  relocate(c(lake_region), .before = site_code) |> 
+  relocate(c(length_mm, weight_g), .before = d15n)
 
 
-# Missing data
-df_csmi <- df_csmi |> 
-  drop_na(d15N, d13C, spp_code, depth, site, season) |> 
-  filter(! site %in% c("0", "Z.unk", "MID", "LARS")) |>
-  filter(! season %in% c("NR")) |>
-  droplevels()  
 
-## Duplicates 
-# dups_csmi <- df_csmi |> 
-#   janitor::get_dupes(sample_id, spp_code, site, season, depth)
-# dups_csmi |>  View()
-# cannot tell because samples ids not really unique - so not removing any
+## Roth 2019 ===================================================================
 
+raw_roth_2019_fish <- readr::read_csv(here("data", "raw-Roth-2019.csv"))
 
-## Filters
-df_csmi <- df_csmi |> 
-  filter(d13C > -50) |> 
-  filter(sample_id != "5720") |> 
-  filter(!(sample_id == "5688" & species == "POM")) |> 
-  filter(depth %in% c("2", "18", "46", "91", "110")) |> 
-  mutate(depth = ifelse(depth=="91","110",depth)) 
-
-## Lipid normalization
-# df_csmi <- df_csmi |> 
-#   mutate(
-#     d13C_norm = case_when(
-#       sample_type == "fish" ~ d13C + (3.5 * (3.5 - cn)) / cn, 
-#       # sample_type == "invert" ~ d13C + (3.5 * (3.5 - cn)) / cn,
-#       TRUE ~ d13C
-#     )
-#   )
-
-
-## Roth 2019 =======================
-
-# Data 
-raw_roth19 <- readr::read_csv(here("data", "raw-Roth-2019.csv"))
-
-## Clean / Tidy
-df_roth <- raw_roth19 |> 
+df_roth_2019_fish <- raw_roth_2019_fish |>
+  cleans_names_and_caps() |> 
   select(
-    -1,     # unknown column, no metadata
-    -ID1, -ID2, -`SIF ID`,-`Serial/Operation`,-ORGANIZATION, 
-    -Comments.x,-Comments.y, -`Box Number`, -`Box Location`, 
-    -DryStart, -DryEnd, -QAQC, -TLin, -`Wt% N*`,-`Wt% C*`, -CAP_BASIN,
-    -`PRED/PREY`, -`Size class`, -`Depth class`, -Stat_district, -Source
-  ) |> 
-  rename(
-    sample_id = MSU_ID, 
-    date = Date,       
-    depth = `Depth (m)`,   
-    site = CAP_SITE, 
-    area = Region,
-    spp_code = Species,
-    d13C = Del13C,  
-    d15N = Del15N, 
-    cn = `C:N ratio`,
-    length_mm = TLmm, 
-    weight_g = TWg, 
-  ) 
+    sample_id = msu_id, 
+    date, 
+    site = cap_site, 
+    depth_m,   
+    lake_region = region,
+    spp_code = species,
+    d15n = del15n,  
+    d13c = del13c, 
+    cn = c_n_ratio,
+    length_mm = t_lmm, 
+    weight_g = t_wg
+    )
 
-# sample tyep and year and season from date
-df_roth <- df_roth |> 
+df_roth_2019_fish <- df_roth_2019_fish |> 
   mutate(
-    depth = as.character(depth),
     dataset = "roth_2019",
     sample_type = case_when(
-      spp_code %in% c("DRE", "INT") ~ "invert", 
+      spp_code %in% c("dre", "int") ~ "invert", 
       TRUE ~ "fish"), 
     year = lubridate::year(date), 
     season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1))
   ) |> 
   mutate(
+    year = case_when(
+      is.na(year) ~ 2019, 
+      TRUE ~ 2019
+    ),
+    lake_region = case_when(
+      lake_region %in% c("nem") ~ "NE", 
+      lake_region %in% c("sem") ~ "SE", 
+      lake_region %in% c("nwm") ~ "NW", 
+      lake_region %in% c("swm") ~ "SW", 
+      TRUE ~ "Huron"
+    ),
     season = case_when(
-      season == "1" ~ "Spring", 
-      season == "2" ~ "Summer", 
-      season == "3" ~ "Fall", 
-      TRUE ~ season)) |> 
-  relocate(c(year, season), .after = date) |> 
-  select(-date)
+        season == "1" ~ "spring", 
+        season == "2" ~ "summer", 
+        season == "3" ~ "fall", 
+        season == "4" ~ "winter",
+        TRUE ~ season)
+    ) |> 
+  relocate(c(year, season), .after = date) 
 
-# Add xrefs
-df_roth <- df_roth |> 
+df_roth_2019_fish <- df_roth_2019_fish |> 
   mutate(
     spp_code = case_when(
-      spp_code=="DRE" ~ "MUS", 
-      spp_code=="SMT" ~ "RAS", 
-      spp_code=="RGB" ~ "ROG", 
+      spp_code=="dre" ~ "mus", 
+      spp_code=="smt" ~ "ras", 
+      spp_code=="rgb" ~ "rog", 
       TRUE ~ spp_code)) |> 
   left_join(xref_spp, by = "spp_code") |> 
+  select(-spp_code) |> 
   relocate(dataset, .before = sample_id) |>
-  relocate(c(spp_code, species, functional_group), .after = sample_id) |> 
-  relocate(c(length_mm, weight_g), .after = cn) |> 
-  relocate(c(area), .before = site) |> 
-  relocate(c(d15N, d13C, cn, length_mm, weight_g), .after = sample_type) 
-  
-
-
-## Duplicates samples
-df_roth |> janitor::get_dupes(sample_id)  # n=66
-
-df_roth <- df_roth |> 
-  group_by(sample_id) |> 
-  slice_head(n = 1) |> 
-  ungroup()
-
-
-# Drop missing data
-df_roth <- df_roth |> 
-  drop_na(d15N, d13C, area) |> 
-  droplevels() 
-
-
-## Remove Lake Huron data, ETC. 
-df_roth <- df_roth |> 
-  filter(! area %in% c("NH", "CH", "SH")) |> 
-  filter(! species %in% c("Invertebrate")) |> 
-  droplevels() 
-
-
-
-## Happel 2010 ==========================
-
-raw_happel2010 <- readxl::read_xlsx(
-  here("data","raw-feiner-2018.xlsx"), 
-  sheet = "Diet-StableIsotope"
-)
-
-## Clean 
-df_happ <- raw_happel2010 |> 
-  janitor::clean_names() |> 
-  select(
-    sample_id = fish_id, spp_code = species, year, season, site, depth, 
-    d15N = corrected_d29_28,  # Corrected δ15N nitrogen stable isotope ratios
-    d13C = corrected_d13_12,  # Corrected δ13C carbon stable isotope ratios
-    # corr_c,  # Lipid-corrected δ13C carbon isotopic ratio (using corrections in Turschak et al. 2014)
-    # corr_n, # Corrected δ15N
-    length_mm = tl
-    ) |> 
-  mutate(
-    dataset = "happel_2010",
-    spp_code = ifelse(spp_code=="STS", "SPS", spp_code), 
-    sample_type = "fish", 
-    length_mm = as.double(length_mm),
-    cn = NA,
-    area = case_when(
-      site %in% c("5R") ~ "NEM", 
-      site %in% c("3S", "4R", "4S") ~ "SEM", 
-      site %in% c("6R") ~ "NWM", 
-      site %in% c("1R", "1S", "2R", "2S", "3R") ~ "SWM")) |> 
-  left_join(xref_spp, by = "spp_code") |> 
-  relocate(dataset, .before = sample_id) |>
-  relocate(c(species, functional_group), .after = spp_code) |> 
-  relocate(c(sample_type), .after = depth) |> 
-  relocate(c(area), .before = site) |> 
-  relocate(c(cn), .before = length_mm)
-
-# Missing data and filters
-df_happ <- df_happ |> 
-  # drop_na(depth) |> 
-  filter(! depth %in% c("unk", "var")) |>
-  droplevels()  
+  relocate(lake_region, .before = site) |> 
+  relocate(c(sample_type, common_name, taxon_group), .after = depth_m) |> 
+  relocate(c(d15n, d13c, cn, length_mm, weight_g), .after = taxon_group) 
 
 
 
 
-## Combine data =====================
 
-# head(df_csmi)
-# head(df_roth)
-# head(df_happ)
 
-data <- bind_rows(df_csmi, df_roth, df_happ)
+
+
