@@ -20,85 +20,56 @@ source("R/r2_bayes.R")
 ## Prep data
 df <- 
   data |> 
-  # df_csmi |> 
-  # filter(! site_code %in% c("SAU")) |>
-  filter(! (species %in% c("POM", "Algae"))) |>
-  # filter(! (is.na(length_mm) & !species %in% c("Dreissenids", "Amphipod")) ) |> 
-  select(area, species, d15N, d13C, length_mm) |> 
+  drop_na(d13c, d15n, lake_region) |> 
+  filter(d13c < -10 & d13c > -50) |>
+  # filter(! (common_name %in% c("pom", "algae"))) |>
+  select(lake_region, common_name, d15n, d13c, length_mm) |> 
   droplevels() |> 
+  # mutate(lake_region = "lakewide") |> 
   mutate(trophic = "consumer") |> 
-  mutate(trophic = ifelse(species=="Dreissenids", "b1", trophic)) |> 
-  mutate(trophic = ifelse(species=="Amphipod", "b2", trophic)) |> 
+  # mutate(trophic = ifelse(common_name == "dreissenids", "b1", trophic)) |> 
+  # mutate(trophic = ifelse(common_name == "amphipod", "b2", trophic)) |> 
+  mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |> 
+  mutate(trophic = ifelse(common_name == "algae", "b2", trophic)) |> 
+  drop_na(d13c, d15n, trophic) |> 
   as.data.frame()
 
-# make fake algae data
-# alg <- df_csmi |> 
-#   filter(depth_m == "2", species == "Algae") |> 
-#   select(site_code, d13C_norm, d15N) |> 
-#   group_by(site_code) |> 
-#   summarise_all(list(mean = mean, sd = sd))
-# 
-# df_alg <- df |> 
-#   distinct(area) |> pull() |> as_tibble() |> rename(area=value) |> 
-#   mutate(species = "Algae", trophic = "b2") |> 
-#   separate(area, into = c("site_code", "depth_m")) |> 
-#   left_join(alg, by = "site_code") |> 
-#   unite(area, site_code, depth_m) |> 
-#   select(-d13C_norm_sd, -d15N_sd) |> 
-#   rename(d13C = d13C_norm_mean, d15N = d15N_mean)
-# 
-# df <- df |> 
-#   bind_rows(df_alg) 
 
 df |> 
-  # filter(area == "LUD") |>
-  mutate(
-    area = case_when(
-      area == "NEM" ~ "Northeast", 
-      area == "NWM" ~ "Northwest", 
-      area == "SEM" ~ "Southeas t", 
-      area == "SWM" ~ "Southwest")
-    ) |> 
-  mutate(
-    area = factor(
-      area, 
-      levels = c("Northeast", "Northwest", "Southeast", "Southwest"))
-    ) |> 
-  ggplot(aes(d13C, d15N)) + 
-  geom_point(aes(shape = trophic, color = trophic), size = 1, alpha = .5) + 
-  facet_wrap(vars(area)) + 
+  ggplot(aes(d13c, d15n)) + 
+  geom_point(aes(color = trophic), size = 2, alpha = .5) + 
+  facet_wrap(vars(lake_region)) +
   labs(color = "Trophic Group", shape = "Trophic Group")
 
 # ggsave(here("out", "plots", "tp-data.png"),
 #        width = 7, height = 4, dpi = 300) 
 
 
- ## Calculate TP and alpha
-
+## Calculate TP and alpha
 # Extract stable isotope data from a data frame
 IsotopesList <- extractIsotopeData(
   df,
   b1 = "b1",
   b2 = "b2", 
   baselineColumn = "trophic", 
-  consumersColumn = "species",
-  d13C = "d13C", 
-  d15N = "d15N",
-  groupsColumn="area"
+  consumersColumn = "common_name",
+  d13C = "d13c", 
+  d15N = "d15n",
+  groupsColumn="lake_region"
   )
 
-# Run two baseline model (Increse n.iter, burnin, thin 4 model convergence)
+# Run two baseline model (Increase n.iter, burn in, thin 4 model convergence)
 TP_model <- parLapply(
   cl, 
   IsotopesList, 
   multiModelTP,
   model = "twoBaselinesFull",
-  lambda = 2,
+  lambda = 1,
   n.chains = 5, 
   print = TRUE,
   n.iter = 1000, 
   burnin = 100, 
-  thin=1
+  thin = 1
   ) 
 
 #save (TP_model,file="TP_model.RData")
@@ -107,7 +78,7 @@ TP_model <- parLapply(
 # Summarize TP data
 TP_data <- fromParallelTP(TP_model, get = "summary")
 colnames(TP_data) <- c(
-  'model','area','species',
+  'model','lake_region','common_name',
   'TP_lower','TP_upper','TP_median','TP_mode',
   'Alpha_lower','Alpha_upper','Alpha_median','Alpha_mode'
   )
@@ -115,23 +86,29 @@ colnames(TP_data) <- c(
 # Data for models:
 df_mod <- df %>%
   filter(trophic == "consumer") %>%
-  select(species, area, length_mm) %>%
-  group_by(species, area) %>%
+  select(common_name, lake_region, length_mm) %>%
+  group_by(common_name, lake_region) %>%
   summarise(length_mm = mean(length_mm, na.rm = TRUE)) %>%
-  left_join(TP_data, by=c("species","area")) %>%
-  mutate(area = factor(area)) %>%
+  left_join(TP_data, by=c("common_name","lake_region")) %>%
+  mutate(lake_region = factor(lake_region)) %>%
+  filter(TP_mode <5.5) |>
+  # filter(length_mm <1000) |> 
+  # drop_na(length_mm) |> 
   as.data.frame ()
 
 # Plot data
 df_mod |> 
-  ggplot(aes(Alpha_mode, TP_mode)) + 
+  ggplot(aes(Alpha_mode, TP_mode)) +
+  # ggplot(aes(Alpha_mode, length_mm)) + 
   geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", color = "black") +
-  geom_point(aes(fill = Alpha_mode), size = 3, shape = 21) + 
-  scale_fill_gradient(low = "green", high = "blue", na.value = NA) +
-  ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50) +
+  geom_point(aes(fill = lake_region), size = 3, shape = 21) + 
+  # geom_point(aes(fill = Alpha_mode), size = 3, shape = 21) +
+  # scale_fill_gradient(low = "green", high = "blue", na.value = NA) +
+  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50) +
   labs(x = "Alpha", y = "Trophic Position", fill = "Alpha") + 
   theme_bw() + 
-  theme(axis.text=element_text(size=14,colour = "black"), 
+  theme(
+    axis.text=element_text(size=14,colour = "black"), 
         axis.title=element_text(size=16), 
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", colour = "black")) 
@@ -144,25 +121,25 @@ df_mod |>
 
 # Different fixed structure + random intercept component
 
-# model_structures <- list(
-#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|area)),  # Quadratic
-#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|area)),  # Linear
-#   bf(TP_mode ~ 1 + (1|area))                   # Null
-#   )
-
 model_structures <- list(
-  bf(TP_mode ~ length_mm * Alpha_mode + (1|area)),
-  bf(TP_mode ~ length_mm + Alpha_mode + (1|area)),
-  bf(TP_mode ~ 1 + (1|area)),
+  bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),  # Quadratic
+  bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),  # Linear
+  bf(TP_mode ~ 1 + (1|lake_region))                   # Null
+  )
 
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|area)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|area)),
-  bf(TP_mode ~ 1 + (1|area)),
-
-  bf(length_mm ~ poly(Alpha_mode,2) + (1|area)),
-  bf(length_mm ~ poly(Alpha_mode,1) + (1|area)),
-  bf(length_mm ~ 1 + (1|area))
-)
+# model_structures <- list(
+#   bf(TP_mode ~ length_mm * Alpha_mode + (1|lake_region)),
+#   bf(TP_mode ~ length_mm + Alpha_mode + (1|lake_region)),
+#   bf(TP_mode ~ 1 + (1|lake_region)),
+# 
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),
+#   bf(TP_mode ~ 1 + (1|lake_region)),
+# 
+#   bf(length_mm ~ poly(Alpha_mode,2) + (1|lake_region)),
+#   bf(length_mm ~ poly(Alpha_mode,1) + (1|lake_region)),
+#   bf(length_mm ~ 1 + (1|lake_region))
+# )
 
 # Fit models to data
 names(model_structures) <- c("Quadratic","Linear", "Null")
@@ -177,15 +154,15 @@ for (i in 1:length (model_structures)){
 }
 
 # save models
-save(models, file="models_TP_alpha.R")
-load("models_TP_alpha.R")
+# save(models, file="models_TP_alpha.R")
+# load("models_TP_alpha.R")
 
 
 
 # Model comparison =================
 
-# models_sub <- models[1:3]
-models_sub <- models[4:6]
+models_sub <- models[1:3]
+# models_sub <- models[4:6]
 # models_sub <- models[7:9]
 
 # compare the different models using different metrics elpd, looic, r2
@@ -235,7 +212,7 @@ for (i in 1:length(models_sub)){
 
 model_sel_tab
 
-save(model_sel_tab, file = here("out", "tbls", "tbl_model_sel.R"))
+# save(model_sel_tab, file = here("out", "tbls", "tbl_model_sel.R"))
 #load("models_TP_alpha.R")
 
 
