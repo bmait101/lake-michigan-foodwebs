@@ -357,7 +357,7 @@ df_roth_2019_fish <- raw_roth_2019_fish |>
   select(
     sample_id = msu_id, 
     date, 
-    site = cap_site, 
+    site_code = cap_site, 
     depth_m,   
     lake_region = region,
     spp_code = species,
@@ -408,7 +408,7 @@ df_roth_2019_fish <- df_roth_2019_fish |>
   left_join(xref_spp, by = "spp_code") |> 
   select(-spp_code) |> 
   relocate(dataset, .before = sample_id) |>
-  relocate(lake_region, .before = site) |> 
+  relocate(lake_region, .before = site_code) |> 
   relocate(c(sample_type, common_name, taxon_group), .after = depth_m) |> 
   relocate(c(d15n, d13c, cn, length_mm, weight_g), .after = taxon_group) 
 

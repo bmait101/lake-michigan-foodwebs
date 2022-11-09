@@ -8,6 +8,11 @@
 
 ## Data processing
 
+### UWM 2010
+
+df_uwm_2010_fish <- df_uwm_2010_fish |> 
+  filter(cn>=1)
+
 ### CSMI --------------------------------------------------------------------
 
 ### Missing data
@@ -92,12 +97,15 @@ data <- bind_rows(
 ## Lipid normalization =========================================================
 
 
-# df_csmi <- df_csmi |> 
-#   mutate(
-#     d13C_norm = case_when(
-#       sample_type == "fish" ~ d13C + (3.5 * (3.5 - cn)) / cn, 
-#       # sample_type == "invert" ~ d13C + (3.5 * (3.5 - cn)) / cn,
-#       TRUE ~ d13C
-#     )
-#   )
+data <- data |>
+  mutate(
+    d13c_norm = case_when(
+      sample_type == "fish" ~ d13c + (3.5 * (3.5 - cn)) / cn,
+      # sample_type == "invert" ~ d13C + (3.5 * (3.5 - cn)) / cn,
+      TRUE ~ d13c
+    ), 
+    d13c_norm2 = if_else(sample_type=="fish" & cn > 3.5,
+                         d13c - 3.32 + (0.99 * cn),
+                         d13c
+  ))
 

@@ -17,20 +17,22 @@ ncores <- 5
 source("R/r2_bayes.R")
 
 
-## Prep data
+## Prep data ============
 df <- 
   data |> 
   drop_na(d13c, d15n, lake_region) |> 
-  filter(d13c < -10 & d13c > -50) |>
+  # filter(d13c < -10 & d13c > -50) |>
+  filter(d13c_norm2 < 0) |>
   # filter(! (common_name %in% c("pom", "algae"))) |>
-  select(lake_region, common_name, d15n, d13c, length_mm) |> 
+  select(lake_region, common_name, d15n, d13c=d13c_norm2, length_mm) |> 
   droplevels() |> 
   # mutate(lake_region = "lakewide") |> 
   mutate(trophic = "consumer") |> 
-  # mutate(trophic = ifelse(common_name == "dreissenids", "b1", trophic)) |> 
-  # mutate(trophic = ifelse(common_name == "amphipod", "b2", trophic)) |> 
-  mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |> 
-  mutate(trophic = ifelse(common_name == "algae", "b2", trophic)) |> 
+  # mutate(trophic = ifelse(common_name == "dreissenids", "b1", trophic)) |>
+  # mutate(trophic = ifelse(common_name %in% c("amphipod", "chironomids"), "b2", trophic)) |>
+  # mutate(trophic = ifelse(common_name == "amphipod", "b2", trophic)) |>
+  mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |>
+  mutate(trophic = ifelse(common_name == "algae", "b2", trophic)) |>
   drop_na(d13c, d15n, trophic) |> 
   as.data.frame()
 
@@ -45,7 +47,8 @@ df |>
 #        width = 7, height = 4, dpi = 300) 
 
 
-## Calculate TP and alpha
+## TP and alpha ===============
+
 # Extract stable isotope data from a data frame
 IsotopesList <- extractIsotopeData(
   df,
@@ -64,7 +67,7 @@ TP_model <- parLapply(
   IsotopesList, 
   multiModelTP,
   model = "twoBaselinesFull",
-  lambda = 1,
+  lambda = 2,
   n.chains = 5, 
   print = TRUE,
   n.iter = 1000, 
@@ -91,7 +94,7 @@ df_mod <- df %>%
   summarise(length_mm = mean(length_mm, na.rm = TRUE)) %>%
   left_join(TP_data, by=c("common_name","lake_region")) %>%
   mutate(lake_region = factor(lake_region)) %>%
-  filter(TP_mode <5.5) |>
+  # filter(TP_mode <5.5) |>
   # filter(length_mm <1000) |> 
   # drop_na(length_mm) |> 
   as.data.frame ()
