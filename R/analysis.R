@@ -21,10 +21,12 @@ source("R/r2_bayes.R")
 df <- 
   data |> 
   drop_na(d13c, d15n, lake_region) |> 
-  # filter(d13c < -10 & d13c > -50) |>
+  filter(d13c < -10 & d13c > -50) |>
   filter(d13c_norm2 < 0) |>
+  filter(lake_region != "Huron") |> 
   # filter(! (common_name %in% c("pom", "algae"))) |>
-  select(lake_region, common_name, d15n, d13c=d13c_norm2, length_mm) |> 
+  # select(lake_region, common_name, d15n, d13c=d13c_norm2, length_mm) |> 
+  select(lake_region, common_name=taxon_specific, d15n, d13c=d13c_norm2, length_mm) |> 
   droplevels() |> 
   # mutate(lake_region = "lakewide") |> 
   mutate(trophic = "consumer") |> 
@@ -32,7 +34,7 @@ df <-
   # mutate(trophic = ifelse(common_name %in% c("amphipod", "chironomids"), "b2", trophic)) |>
   # mutate(trophic = ifelse(common_name == "amphipod", "b2", trophic)) |>
   mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |>
-  mutate(trophic = ifelse(common_name == "algae", "b2", trophic)) |>
+  mutate(trophic = ifelse(common_name == "cladophora", "b2", trophic)) |>
   drop_na(d13c, d15n, trophic) |> 
   as.data.frame()
 
@@ -94,7 +96,7 @@ df_mod <- df %>%
   summarise(length_mm = mean(length_mm, na.rm = TRUE)) %>%
   left_join(TP_data, by=c("common_name","lake_region")) %>%
   mutate(lake_region = factor(lake_region)) %>%
-  # filter(TP_mode <5.5) |>
+  filter(TP_mode <5.5) |>
   # filter(length_mm <1000) |> 
   # drop_na(length_mm) |> 
   as.data.frame ()
@@ -102,13 +104,13 @@ df_mod <- df %>%
 # Plot data
 df_mod |> 
   ggplot(aes(Alpha_mode, TP_mode)) +
-  # ggplot(aes(Alpha_mode, length_mm)) + 
+  # ggplot(aes(Alpha_mode, length_mm)) +
   geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", color = "black") +
-  geom_point(aes(fill = lake_region), size = 3, shape = 21) + 
+  geom_point(aes(fill = lake_region), size = 3, shape = 21) +
   # geom_point(aes(fill = Alpha_mode), size = 3, shape = 21) +
   # scale_fill_gradient(low = "green", high = "blue", na.value = NA) +
-  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50) +
-  labs(x = "Alpha", y = "Trophic Position", fill = "Alpha") + 
+  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50, size=3) +
+  labs(x = "Alpha", y = "Trophic Position", fill = "Lake Region") + 
   theme_bw() + 
   theme(
     axis.text=element_text(size=14,colour = "black"), 
