@@ -70,12 +70,13 @@
 data <- bind_rows(
   df_uwm_2002_fish, 
   df_uwm_2010_fish, 
-  df_uwm_2010_benthic,
+  df_uwm_2010_benthic, 
   df_nps_2015_salmonids,
   df_glft_2016_fish,
   df_csmi_2015,
   df_roth_2019_fish,
   ) |> 
+  select(-taxon_code) |> 
   mutate(
     dataset = factor(
       dataset, levels = c(
@@ -84,9 +85,21 @@ data <- bind_rows(
         "csmi_2015",
         "nps_2015",
         "glft_2016",
-        "roth_2019"))
-    ) 
-
+        "roth_2019"
+        )
+      ), 
+    compartment = factor(
+      compartment, levels = c(
+        "pom", 
+        "macro-alga",
+        "benthic inverts",
+        "zooplankton", 
+        "fishes"
+        )
+      ), 
+    lake_region = factor(lake_region, levels = c("nw", "ne", "sw", "se"))
+    ) |> 
+  mutate(across(is.character, as.factor))
 
 
 ## Lipid normalization =========================================================
@@ -95,12 +108,26 @@ data <- bind_rows(
 data <- data |>
   mutate(
     d13c_norm = case_when(
-      compartment == "fish" ~ d13c + (3.5 * (3.5 - cn)) / cn,
-      # sample_type == "invert" ~ d13C + (3.5 * (3.5 - cn)) / cn,
-      TRUE ~ d13c
-    ), 
-    d13c_norm2 = if_else(compartment=="fish" & cn > 3.5,
-                         d13c - 3.32 + (0.99 * cn),
-                         d13c
-  ))
+      compartment %in% c("fishes") & cn > 3.5 ~ 
+        d13c + (3.5 * (3.5 - cn)) / cn,
+      TRUE ~ d13c), 
+    d13c_norm2 = if_else(
+      compartment == "fishes" & cn > 3.5,
+      d13c - 3.32 + (0.99 * cn),
+      d13c), 
+    d13c_norm3 = if_else(
+      compartment %in% c("fishes", "benthic inverts", "zooplankton") & cn > 3.5,
+      d13c - 3.32 + (0.99 * cn),
+      d13c)
+    )
+
+
+## Filters  =========================================================
+
+data <- data |> 
+  filter(lake_region != "Huron") |> 
+  filter(d13c < -10 & d13c > -40) |> 
+  filter(d13c_norm < -10 & d13c > -40) |>
+  filter(d13c_norm2 < -10 & d13c_norm2 > -40) 
+
 

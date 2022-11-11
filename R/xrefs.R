@@ -1,8 +1,5 @@
 
 # Xref table
-xref_taxa <- 
-  read_csv(here("data", "xref-spp.csv")) |> 
-  cleans_names_and_caps()
 
 xref_ports <- 
   read_csv(here("data", "xref-sites-ports-regions.csv")) |> 

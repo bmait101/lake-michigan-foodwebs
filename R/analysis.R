@@ -21,18 +21,12 @@ source("R/r2_bayes.R")
 df <- 
   data |> 
   drop_na(d13c, d15n, lake_region) |> 
-  filter(d13c < -10 & d13c > -50) |>
-  filter(d13c_norm2 < 0) |>
-  filter(lake_region != "Huron") |> 
-  # filter(! (common_name %in% c("pom", "algae"))) |>
-  # select(lake_region, common_name, d15n, d13c=d13c_norm2, length_mm) |> 
-  select(lake_region, common_name=taxon_specific, d15n, d13c=d13c_norm2, length_mm) |> 
+  select(lake_region, common_name=taxon, 
+         d15n, d13c=d13c_norm2, length_mm) |> 
   droplevels() |> 
-  # mutate(lake_region = "lakewide") |> 
   mutate(trophic = "consumer") |> 
   # mutate(trophic = ifelse(common_name == "dreissenids", "b1", trophic)) |>
   # mutate(trophic = ifelse(common_name %in% c("amphipod", "chironomids"), "b2", trophic)) |>
-  # mutate(trophic = ifelse(common_name == "amphipod", "b2", trophic)) |>
   mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |>
   mutate(trophic = ifelse(common_name == "cladophora", "b2", trophic)) |>
   drop_na(d13c, d15n, trophic) |> 
@@ -45,8 +39,8 @@ df |>
   facet_wrap(vars(lake_region)) +
   labs(color = "Trophic Group", shape = "Trophic Group")
 
-# ggsave(here("out", "plots", "tp-data.png"),
-#        width = 7, height = 4, dpi = 300) 
+# ggsave(here("out", "plots", "tp-data_corr-fish.png"),
+#        width = 7, height = 5, dpi = 300)
 
 
 ## TP and alpha ===============
@@ -77,8 +71,8 @@ TP_model <- parLapply(
   thin = 1
   ) 
 
-#save (TP_model,file="TP_model.RData")
-#load ("TP_model.RData")
+# save (TP_model, file = here("out", "models", "tp", "TP_model_corr-fish.RData"))
+# load ("TP_model.RData")
 
 # Summarize TP data
 TP_data <- fromParallelTP(TP_model, get = "summary")
@@ -96,7 +90,7 @@ df_mod <- df %>%
   summarise(length_mm = mean(length_mm, na.rm = TRUE)) %>%
   left_join(TP_data, by=c("common_name","lake_region")) %>%
   mutate(lake_region = factor(lake_region)) %>%
-  filter(TP_mode <5.5) |>
+  filter(TP_mode < 6) |> 
   # filter(length_mm <1000) |> 
   # drop_na(length_mm) |> 
   as.data.frame ()
@@ -106,10 +100,10 @@ df_mod |>
   ggplot(aes(Alpha_mode, TP_mode)) +
   # ggplot(aes(Alpha_mode, length_mm)) +
   geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", color = "black") +
-  geom_point(aes(fill = lake_region), size = 3, shape = 21) +
+  geom_point(aes(fill = lake_region), size = 2, shape = 21) +
   # geom_point(aes(fill = Alpha_mode), size = 3, shape = 21) +
   # scale_fill_gradient(low = "green", high = "blue", na.value = NA) +
-  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50, size=3) +
+  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50, size=2) +
   labs(x = "Alpha", y = "Trophic Position", fill = "Lake Region") + 
   theme_bw() + 
   theme(
@@ -118,11 +112,11 @@ df_mod |>
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", colour = "black")) 
 
-# ggsave(here("out", "plots", "tp-alpha.png"),
-#        width = 10, height = 6, dpi = 300)
+ggsave(here("out", "plots", "tp-alpha-corr-fish_species.png"),
+       width = 8, height = 6, dpi = 300)
 
 
-# RUN MODELS ==================
+# RUN MODELS ===================================================================
 
 # Different fixed structure + random intercept component
 
@@ -136,11 +130,11 @@ model_structures <- list(
 #   bf(TP_mode ~ length_mm * Alpha_mode + (1|lake_region)),
 #   bf(TP_mode ~ length_mm + Alpha_mode + (1|lake_region)),
 #   bf(TP_mode ~ 1 + (1|lake_region)),
-# 
+#
 #   bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),
 #   bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),
 #   bf(TP_mode ~ 1 + (1|lake_region)),
-# 
+#
 #   bf(length_mm ~ poly(Alpha_mode,2) + (1|lake_region)),
 #   bf(length_mm ~ poly(Alpha_mode,1) + (1|lake_region)),
 #   bf(length_mm ~ 1 + (1|lake_region))
@@ -151,8 +145,8 @@ names(model_structures) <- c("Quadratic","Linear", "Null")
 models <- list()
 for (i in 1:length (model_structures)){
   models[[i]] <- brm(
-    model_structures[[i]], 
-    cores = ncores, 
+    model_structures[[i]],
+    cores = ncores,
     control = list(adapt_delta = 0.90, max_treedepth = 10),
     df_mod, seed = 12345, iter = 2000, thin = 1
     )
@@ -177,16 +171,16 @@ comp <- loo_compare(
   loo(models_sub[[3]])
   )
 
-comp_summary <- 
+comp_summary <-
   print(comp, simplify = FALSE, digits = 3) %>%
   as.data.frame()
 
 model_sel_tab <- data.frame (elpd_diff = rep(NA, nrow(comp_summary)),
-                             elpd = rep(NA, nrow(comp_summary)), 
-                             p_loo = rep(NA, nrow(comp_summary)), 
-                             looic = rep(NA, nrow(comp_summary)), 
+                             elpd = rep(NA, nrow(comp_summary)),
+                             p_loo = rep(NA, nrow(comp_summary)),
+                             looic = rep(NA, nrow(comp_summary)),
                              r2_loo = rep(NA, nrow(comp_summary)),
-                             r2_marg = rep(NA, nrow(comp_summary)), 
+                             r2_marg = rep(NA, nrow(comp_summary)),
                              r2_cond = rep(NA, nrow(comp_summary)),
                              row.names= rownames(comp_summary))
 
@@ -217,8 +211,8 @@ for (i in 1:length(models_sub)){
 
 model_sel_tab
 
-# save(model_sel_tab, file = here("out", "tbls", "tbl_model_sel.R"))
-#load("models_TP_alpha.R")
+# save(model_sel_tab, file = here("out", "tbls", "tbl_model_sel_corr.R"))
+# load("models_TP_alpha.R")
 
 
 
@@ -254,8 +248,9 @@ P1[[1]] +
         axis.title=element_text(size=16), 
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", colour = "black")) 
-  
 
+ggsave(here("out", "plots", "tp-alpha-corr-fish_modeled.png"),
+       width = 8, height = 6, dpi = 300)
 
 
 # Diagnostics =======================

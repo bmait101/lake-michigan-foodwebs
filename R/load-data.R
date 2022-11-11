@@ -391,8 +391,6 @@ df_roth_2019_fish <- raw_roth_2019_fish |>
     mass_g = t_wg
     )
 
-
-
 df_roth_2019_fish <- df_roth_2019_fish |> 
   mutate(
     taxon_code = case_when(
@@ -412,10 +410,9 @@ df_roth_2019_fish <- df_roth_2019_fish |>
   select(-site_code) |> 
   mutate(
     dataset = "roth_2019",
-    year = lubridate::year(date), 
+    year = lubridate::year(date),
     season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)),
     port = NA,
-    date = NA,
     num_ind = NA,
     year = case_when(is.na(year) ~ 2019, TRUE ~ 2019)
     ) |> 
