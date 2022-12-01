@@ -18,52 +18,66 @@ source("R/r2_bayes.R")
 
 
 ## Prep data ============
-df <- 
-  data |> 
-  drop_na(d13c, d15n, lake_region) |> 
-  select(lake_region, common_name=taxon, 
-         d15n, d13c=d13c_norm2, length_mm) |> 
+
+df <- data |> 
+  select(dataset, lake_region, year, season, compartment, species, d13c_norm, d15n, length_mm) |> 
+  drop_na(d13c_norm, d15n, lake_region, year, season) |> 
+  # filter(dataset %in% c("csmi_2015", "nps_2015")) |>
+  filter(dataset %in% c("csmi_2015", "nps_2015","glft_2016","roth_2019")) |>
+  filter(!compartment %in% c("ichthoplankton")) |>
+  # filter(!compartment %in% c("ichthoplankton", "pom", "macro-alga")) |>
+  # mutate(grp = "pooled") |>
+  mutate(grp = lake_region) |>
+  # mutate(grp = season) |>
+  # unite("grp", lake_region, season) |>
+  # filter(! grp %in% c("ne_1", "se_1")) |>
+  # unite("species", c(species, lake_region)) |>
+  # unite("species", c(species, season)) |>
+  # unite("species", c(species, lake_region, season)) |>
+  mutate(
+    trophic = case_when(
+      compartment == "pom" ~ "b1",
+      compartment == "macro-alga" ~ "b2",
+      TRUE ~ "consumer"
+  )) |> 
   droplevels() |> 
-  mutate(trophic = "consumer") |> 
-  # mutate(trophic = ifelse(common_name == "dreissenids", "b1", trophic)) |>
-  # mutate(trophic = ifelse(common_name %in% c("amphipod", "chironomids"), "b2", trophic)) |>
-  mutate(trophic = ifelse(common_name == "pom", "b1", trophic)) |>
-  mutate(trophic = ifelse(common_name == "cladophora", "b2", trophic)) |>
-  drop_na(d13c, d15n, trophic) |> 
   as.data.frame()
 
-
 df |> 
-  ggplot(aes(d13c, d15n)) + 
+  ggplot(aes(d13c_norm, d15n)) + 
   geom_point(aes(color = trophic), size = 2, alpha = .5) + 
-  facet_wrap(vars(lake_region)) +
+  facet_wrap(vars(grp)) +
   labs(color = "Trophic Group", shape = "Trophic Group")
 
-# ggsave(here("out", "plots", "tp-data_corr-fish.png"),
+
+# ggsave(here("out", "plots", "2015-19_tp-data_corr-fish.png"),
 #        width = 7, height = 5, dpi = 300)
 
 
 ## TP and alpha ===============
 
-# Extract stable isotope data from a data frame
 IsotopesList <- extractIsotopeData(
   df,
   b1 = "b1",
   b2 = "b2", 
   baselineColumn = "trophic", 
-  consumersColumn = "common_name",
-  d13C = "d13c", 
-  d15N = "d15n",
-  groupsColumn="lake_region"
+  consumersColumn = "species",
+  groupsColumn = "grp",
+  d13C = "d13c_norm", 
+  d15N = "d15n"
   )
 
+summary(IsotopesList)
+plot(IsotopesList$`nw-alewife_nw_2`)
+
+
 # Run two baseline model (Increase n.iter, burn in, thin 4 model convergence)
-TP_model <- parLapply(
+TP_model_5_d <- parLapply(
   cl, 
   IsotopesList, 
   multiModelTP,
   model = "twoBaselinesFull",
-  lambda = 2,
+  lambda = 1,
   n.chains = 5, 
   print = TRUE,
   n.iter = 1000, 
@@ -71,13 +85,18 @@ TP_model <- parLapply(
   thin = 1
   ) 
 
+
+TP_model <- TP_model_5_b
+
+
 # save (TP_model, file = here("out", "models", "tp", "TP_model_corr-fish.RData"))
 # load ("TP_model.RData")
 
 # Summarize TP data
 TP_data <- fromParallelTP(TP_model, get = "summary")
+head(TP_data)
 colnames(TP_data) <- c(
-  'model','lake_region','common_name',
+  'model','group',"species",
   'TP_lower','TP_upper','TP_median','TP_mode',
   'Alpha_lower','Alpha_upper','Alpha_median','Alpha_mode'
   )
@@ -85,14 +104,16 @@ colnames(TP_data) <- c(
 # Data for models:
 df_mod <- df %>%
   filter(trophic == "consumer") %>%
-  select(common_name, lake_region, length_mm) %>%
-  group_by(common_name, lake_region) %>%
+  select(species, length_mm) %>%
+  group_by(species) %>%
   summarise(length_mm = mean(length_mm, na.rm = TRUE)) %>%
-  left_join(TP_data, by=c("common_name","lake_region")) %>%
-  mutate(lake_region = factor(lake_region)) %>%
-  filter(TP_mode < 6) |> 
-  # filter(length_mm <1000) |> 
-  # drop_na(length_mm) |> 
+  left_join(TP_data, by=c("species")) %>%
+  mutate(group = factor(group)) %>%
+  # separate(species, into = c("species", "lake_region"), sep = "_") |>
+  # separate(species, into = c("species", "season"), sep = "_") |>
+  # separate(species, into = c("species", "lake_region", "season"), sep = "_") |>
+  # unite("region_season", lake_region, season) |> 
+  # mutate(group = factor(season)) %>%
   as.data.frame ()
 
 # Plot data
@@ -100,20 +121,21 @@ df_mod |>
   ggplot(aes(Alpha_mode, TP_mode)) +
   # ggplot(aes(Alpha_mode, length_mm)) +
   geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", color = "black") +
-  geom_point(aes(fill = lake_region), size = 2, shape = 21) +
-  # geom_point(aes(fill = Alpha_mode), size = 3, shape = 21) +
-  # scale_fill_gradient(low = "green", high = "blue", na.value = NA) +
-  ggrepel::geom_text_repel(aes(label = common_name), max.overlaps = 50, size=2) +
-  labs(x = "Alpha", y = "Trophic Position", fill = "Lake Region") + 
+  geom_point(aes(fill = group), size = 3, alpha = 0.5, shape = 21) +
+  # ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50, size=2) +
+  scale_fill_viridis_d() +
+  labs(title = "2015-2019, region baseline, by season",x = "Alpha", y = "TP") +
+  xlim(c(0,1)) +  
+  ylim(c(0.5,5)) + 
   theme_bw() + 
-  theme(
-    axis.text=element_text(size=14,colour = "black"), 
+  theme(axis.text=element_text(size=14,colour = "black"), 
         axis.title=element_text(size=16), 
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", colour = "black")) 
 
-ggsave(here("out", "plots", "tp-alpha-corr-fish_species.png"),
-       width = 8, height = 6, dpi = 300)
+# ggsave(here("out", "plots", "05_d.png"),
+#        width = 12, height = 8, dpi = 300)
+
 
 
 # RUN MODELS ===================================================================
@@ -121,23 +143,29 @@ ggsave(here("out", "plots", "tp-alpha-corr-fish_species.png"),
 # Different fixed structure + random intercept component
 
 model_structures <- list(
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),  # Quadratic
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),  # Linear
-  bf(TP_mode ~ 1 + (1|lake_region))                   # Null
+  bf(TP_mode ~ poly(Alpha_mode,2) + (1|year)),  # Quadratic
+  bf(TP_mode ~ poly(Alpha_mode,1) + (1|year)),  # Linear
+  bf(TP_mode ~ 1 + (1|year))                   # Null
   )
 
+model_structures <- list(
+  bf(TP_mode ~ poly(Alpha_mode,2) + (1|group)),  # Quadratic
+  bf(TP_mode ~ poly(Alpha_mode,1) + (1|group)),  # Linear
+  bf(TP_mode ~ 1 + (1|group))                   # Null
+)
+
 # model_structures <- list(
-#   bf(TP_mode ~ length_mm * Alpha_mode + (1|lake_region)),
-#   bf(TP_mode ~ length_mm + Alpha_mode + (1|lake_region)),
-#   bf(TP_mode ~ 1 + (1|lake_region)),
-#
-#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),
-#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),
-#   bf(TP_mode ~ 1 + (1|lake_region)),
-#
-#   bf(length_mm ~ poly(Alpha_mode,2) + (1|lake_region)),
-#   bf(length_mm ~ poly(Alpha_mode,1) + (1|lake_region)),
-#   bf(length_mm ~ 1 + (1|lake_region))
+#   bf(TP_mode ~ length_mm * Alpha_mode + (1|group)),
+#   bf(TP_mode ~ length_mm + Alpha_mode + (1|group)),
+#   bf(TP_mode ~ 1 + (1|group)),
+# 
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|group)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|group)),
+#   bf(TP_mode ~ 1 + (1|group)),
+# 
+#   bf(length_mm ~ poly(Alpha_mode,2) + (1|group)),
+#   bf(length_mm ~ poly(Alpha_mode,1) + (1|group)),
+#   bf(length_mm ~ 1 + (1|group))
 # )
 
 # Fit models to data
@@ -161,8 +189,8 @@ for (i in 1:length (model_structures)){
 # Model comparison =================
 
 models_sub <- models[1:3]
-# models_sub <- models[4:6]
-# models_sub <- models[7:9]
+models_sub <- models[4:6]
+models_sub <- models[7:9]
 
 # compare the different models using different metrics elpd, looic, r2
 comp <- loo_compare(
@@ -211,7 +239,7 @@ for (i in 1:length(models_sub)){
 
 model_sel_tab
 
-# save(model_sel_tab, file = here("out", "tbls", "tbl_model_sel_corr.R"))
+# save(model_sel_tab, file = here("out", "tbls", "2015-19_tbl_model_sel.R"))
 # load("models_TP_alpha.R")
 
 
@@ -249,8 +277,13 @@ P1[[1]] +
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "white", colour = "black")) 
 
-ggsave(here("out", "plots", "tp-alpha-corr-fish_modeled.png"),
+ggsave(here("out", "plots", "csmi_tp-alpha_modeled.png"),
        width = 8, height = 6, dpi = 300)
+# ggsave(here("out", "plots", "csmi_length-alpha_modeled.png"),
+#        width = 8, height = 6, dpi = 300)
+# ggsave(here("out", "plots", "csmi_length-alpha_x_modeled.png"),
+#        width = 8, height = 6, dpi = 300)
+
 
 
 # Diagnostics =======================
