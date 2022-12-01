@@ -12,6 +12,6 @@ relocate_columns <- function(data) {
     relocate(dataset, .before = sample_id) |> 
     relocate(c(year, season), .after = date) |> 
     relocate(c(lake_region, port, depth_m), .after = season) |> 
-    relocate(c(compartment, taxon, taxon_specific, taxon_code, num_ind), .after = depth_m) |> 
+    relocate(c(compartment, species, species_group, num_ind), .after = depth_m) |> 
     relocate(c(length_mm, mass_g, d15n, d13c, cn), .after = num_ind)
 }
