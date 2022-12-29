@@ -19,7 +19,7 @@ pacman::p_load(
   rstanarm,  # rstanarm: Bayesian Applied Regression Modeling via Stan
   tidybayes, # tidy data + ggplot workflow for bayes
   broom,  # tidy statistical objects
-  performance
+  performance. # r2_bayes function
 )
 
 
