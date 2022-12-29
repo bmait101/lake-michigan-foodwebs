@@ -15,3 +15,5 @@ relocate_columns <- function(data) {
     relocate(c(compartment, species, species_group, num_ind), .after = depth_m) |> 
     relocate(c(length_mm, mass_g, d15n, d13c, cn), .after = num_ind)
 }
+
+

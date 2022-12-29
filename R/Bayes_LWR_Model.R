@@ -1,20 +1,23 @@
 #-----------------------------------------------#
 # Bayesian L-W regression model (Froese et al. 2014)
 # Modified from Fred Keppeller
-# Bryan Maitland
 #----------------------------------------------#
 
+# Requires list of fish species to run analysis on 
+
 # Libraries
-pacman::p_load(here, rfishbase, data.table, R2jags, dplyr)
+pacman::p_load(here, tidyverse, rfishbase, R2jags)
 
 # Prep -----
 
+# List of our species
+xref_spp <- read.csv(here("data", "spp_xref.csv")) |> 
+  mutate(common_name = str_to_lower(common_name))
+
+List_fish <- xref_spp |> select(Species=sci_name) |> as.data.frame()
+
 # Extract species & bodyshape columns from morphology database (fishbase)  
 shape_fish <- morphology()[,c(2,13)]
-
-# List of our species
-List_fish <- read.csv(here("data","species-list.csv"))
-# List_fish <- List_fish_shape[,"Species"]
 
 # Extract length-weight relationships available from fishbase
 # data_LL <- length_length()
@@ -56,7 +59,7 @@ data_LW <- merge(data_LW, data, by="Species")
 data_LW$Species <- gsub(" ", "_", data_LW$Species)
 
 # Organize fish species table
-List_fish <- data.frame(Species=List_fish)
+# List_fish <- data.frame(Species=List_fish)
 Genus <- data.frame(
   do.call(
     'rbind', strsplit(as.character(List_fish$Species), ' ', fixed=TRUE)
@@ -67,12 +70,15 @@ List_fish$Genus<-Genus[,1]
 List_fish$Ep_specific<-Genus[,2]
 List_fish <- merge(List_fish, shape_fish, by="Species")
 colnames(List_fish)[4]<- "Bshape"      
-List_fish <- List_fish |> 
+List_fish <- 
+  List_fish |> 
   mutate(Bshape = case_when(
     Ep_specific == "thompsonii" ~ "elongated", 
+    Ep_specific == "bairdii" ~ "elongated", 
     Ep_specific == "hudsonius" ~ "fusiform / normal", 
+    Ep_specific == "diaphanus" ~ "fusiform / normal", 
     TRUE ~ Bshape))
-List_fish <- List_fish |> slice(-18)
+# List_fish <- List_fish |> slice(-18)
 
 #-------------------------#
 # BAYESIAN ANALYSIS ----
@@ -350,5 +356,19 @@ for (i in 1:nrow(List_fish)) {
   } # END ALL
 dev.off()
 
-write.table (RESULTS, file= here("out", "models", "lw", "results_L_W_Bayes.txt"))
+RESULTS
+write.table (RESULTS, file = here("out", "models", "lw", "results_L_W_Bayes_v2.txt"))
+# RESULTS <- read.table (file = here("out", "models", "lw", "results_L_W_Bayes.txt"))
+
+df_lw_params <- RESULTS |> 
+  as_tibble() |> 
+  slice(-33) |>  # remove duplicate brown trout record
+  select(
+    sci_name = Target.Species, 
+    log_a = mean.loga.Target.species, 
+    b = mean.b.Target.species
+    )
+
+write_rds(df_lw_params, here("out", "tbls", "body_mass_params.rds"))
+
 
