@@ -959,24 +959,6 @@ data <- data |>
   )
 
 
-## Outliers  ==================================================================
-
-# data |>
-#   filter(d13c < -10) |> 
-#   filter(d13c > -40) |>  
-#   ggplot(aes(d13c)) + geom_boxplot()
-# data |> ggplot(aes(d15n)) + geom_boxplot()
-# data |> ggplot(aes(cn)) + geom_boxplot()
-# data |> ggplot(aes(length_mm)) + geom_boxplot()
-# data |> ggplot(aes(mass_g)) + geom_boxplot()
-
-data <- data |> 
-  filter(d13c < -10) |> 
-  filter(d13c > -40) |> 
-  filter(cn < 30)
-
-
-
 # Convert body size   ========================================================
 
 # load log a and b parameters from L-W regressions (02_Bayes_LWR_Model.R)
