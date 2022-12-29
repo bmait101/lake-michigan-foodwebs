@@ -28,9 +28,21 @@ source(here("R", "helper_fxs.R"))  # helper functions for data cleaning
 # source(here("R", "r2_bayes.R"))  
 
 # Source xrefs tables for ports, species
-source(here("R", "load_xref_tbls.R"))
+xref_ports <- 
+  read_csv(here("data", "xref-sites-ports-regions.csv")) |> 
+  cleans_names_and_caps()
+
+xref_compartments <- 
+  read_csv(here("data", "xref_taxa_compartment.csv")) |> 
+  cleans_names_and_caps()
+
+# load scientific names
+xref_sci_names <- 
+  read.csv(here("data", "xref_fish_species_names.csv")) |> 
+  mutate(common_name = str_to_lower(common_name))
 
 
+# custom plotting theme
 theme_clean <- function() {
   theme_minimal(base_size = 16) +
     theme(
