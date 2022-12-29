@@ -40,3 +40,61 @@ csmi_lengths <- csmi_lengths |>
     species_name == "slimy sculpin" & length < 40 ~ "slimy sculpin sm", 
     TRUE ~ species_name
   ))
+
+
+# Summarize size distributions for each species, port, season
+csmi_lengths_dists <- csmi_lengths |> 
+  group_by(species_name, season, port_name, station_depth) |> 
+  summarise(
+    mean = mean(length, na.rm = TRUE), 
+    sd = sd(length, na.rm = TRUE), 
+    .groups = 'drop'
+  )
+
+
+
+# Visualize length distributions
+# csmi_lengths |> 
+#   ggplot(aes(length)) + 
+#   geom_density() + 
+#   facet_grid(rows = vars(port_name), cols = vars(species_name), 
+#              scales = 'free')
+
+# Test it
+# # Subset fish with no lengths for testing (only have length data for >18m)
+# df_csmi_2015_nolen <- df_csmi_2015 |>
+#   filter(is.na(length_mm), depth_m >= 18, compartment=="fishes") |>
+#   select(species_group, season, port, depth_m)
+#
+# # Join distribution summary stats to csmi data
+# df_csmi_2015_nolen_dists <- 
+#   df_csmi_2015_nolen |> 
+#   left_join(
+#     csmi_lengths_dists, by = c(
+#       "species_group"="species_name", 
+#       "season", 
+#       "port"="port_name", 
+#       "depth_m"="station_depth")
+#   )
+#
+# # Simulate lengths - using distribution stats
+# df_csmi_2015_nolen_dists_lengthed <- 
+#   df_csmi_2015_nolen_dists |> 
+#   mutate(seed = 1:nrow(df_csmi_2015_nolen_dists)) %>% 
+#   mutate(
+#     length_mm = pmap_dbl(
+#       list(mean, sd, seed), 
+#       function(x, y, z){
+#         set.seed(z); rnorm(1, x, y)
+#       }
+#     )
+#   )
+#
+# Visualize simulated length distributions
+# df_csmi_2015_nolen_dists_lengthed |>
+#   ggplot(aes(length_mm)) +
+#   geom_density() +
+#   # geom_density(aes(color = factor(station_depth))) +
+#   facet_grid(rows = vars(port), cols = vars(species_group),
+#              scales = 'free')
+
