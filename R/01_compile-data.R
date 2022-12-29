@@ -1,5 +1,10 @@
 
-# Read in raw datasets & do some cleaning
+# Read in raw datasets and standardize
+# Combine datasets
+# Clean taxonomy and assiagn factors
+# Apply lipid normalization
+# Apply body mass conversions
+
 
 # Notes:
 # Each dataset is different. Some preprocessing has been done 
@@ -187,6 +192,8 @@ source(here::here("R", "00_prep.R"))
 # # From 15% to ~70% now have lengths
 # 
 # saveRDS(df_csmi_2015_lengthed, here("out","data","df_csmi_2015_lengthed.rds"))
+
+# Load csmi data that has length data attributed to fishes
 df_csmi_2015_lengthed <- readRDS(here("out","data","df_csmi_2015_lengthed.rds"))
 
 ### Standardize data
@@ -978,7 +985,7 @@ df_lw_params <- read_rds(here("out", "tbls", "body_mass_params.rds"))
 # Join params to data
 data <- data |> 
   left_join(df_lw_params, by = "sci_name") |> 
-  mutate(across(c(sci_name), as.factor())) 
+  mutate(across(c(sci_name), as.factor)) 
 
 # Convert
 data <- 
