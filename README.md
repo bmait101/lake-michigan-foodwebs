@@ -13,3 +13,10 @@ Collaborators:
 * [Joel Hoffman](https://www.researchgate.net/profile/Joel-Hoffman) (EPA)
 * [Bo Bunnell](https://www.usgs.gov/staff-profiles/david-b-bunnell) (USGS GLSC)
 * [Scott McNaught](http://people.se.cmich.edu/mcnau1as/) (Central Michigan University)
+
+
+## Folders 
+
+**R:** 
+- Contains .R files to clean data, run analyses, and make figures. 
+- Run 00_prep.R before running any other scripts.
