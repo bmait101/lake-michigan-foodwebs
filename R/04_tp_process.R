@@ -97,7 +97,7 @@ df_reg_mod_data_2015[[8]]$season <- factor(df_reg_mod_data_2015[[8]]$season)
 
 str(df_reg_mod_data_2015)
 
-save(df_reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
+# save(df_reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
 
 
 # Viz data for models =======================================
