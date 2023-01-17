@@ -978,7 +978,7 @@ data <-
     TRUE ~ mass_g
   )) |> 
   select(-log_a, -b, -length_cm)
-
+  
 
 # Add body mass average values for other groups / species
 
@@ -986,19 +986,19 @@ data <- data |>
   mutate(mass_g = case_when(
     species == "amphipod" ~ 0.001, 
     species == "chironomids" ~ 0.0002, 
-    species == "crayfish" ~ 5, 
+    species == "crayfish" ~ 2, 
     species == "hydracarina" ~ 0.002, 
     species == "isopod" ~ 0.01, 
     species == "leech" ~ 1, 
-    species == "oligochaete" ~ .1, 
-    species == "dreissena" ~ .1,
-    species == "bythotrephes" ~ 2,
+    species == "oligochaete" ~ .01, 
+    species == "dreissena" ~ .01,
+    species == "bythotrephes" ~ .04,
     species == "hemimysis" ~ 0.01,
-    species == "mysis" ~ 3,
-    species == "zooplankton" ~ .5,
-    species == "zooplankton240" ~ .2,
-    species == "zooplankton153" ~ .1,
-    species == "zooplankton63" ~ .01,
+    species == "mysis" ~ 0.01,
+    species == "zooplankton" ~ .005,
+    species == "zooplankton240" ~ .01,
+    species == "zooplankton153" ~ .005,
+    species == "zooplankton63" ~ .001,
     TRUE ~ mass_g
   )) 
 
@@ -1010,8 +1010,57 @@ data <- data |>
 #   arrange(compartment, species) |>
 #   print(n=100)
 
+
+## Outliers  ==================================================================
+
+# data |>
+#   filter(d13c < -10) |>
+#   filter(d13c > -40) |>
+#   ggplot(aes(d13c)) + geom_boxplot()
+# data |> ggplot(aes(d15n)) + geom_boxplot()
+# data |> ggplot(aes(cn)) + geom_boxplot()
+# data |> ggplot(aes(length_mm)) + geom_boxplot()
+# data |> ggplot(aes(mass_g)) + geom_boxplot()
+
+# remove obvious outliers
+data <- data |> 
+  filter(d13c < -10) |> 
+  filter(d13c > -40) |> 
+  filter(cn < 30)
+
+load(here("out", "data", "compiled_data.RData"))
+
+# remove pom > -20 per mil
+data <- data |> 
+  filter(!(compartment == "pom" & d13c > -20))
+
+
+# data |>
+#   filter(compartment %in% c("pom", "macro-alga")) |>
+#   mutate(lake_region = case_when(
+#     lake_region %in% c("nw", "ne") ~ "north",
+#     lake_region %in% c("sw", "se") ~ "south"
+#   )) |>
+#   ggplot(aes(d13c, d15n)) +
+#   geom_point(aes(color = species, shape = factor(season)), size = 3)+ 
+#   facet_wrap(vars(lake_region))
+
 # Save compiled data =============================================
 
 save(data, file = here("out", "data", "compiled_data.RData"))
-# load(here("out", "data", "compiled_data.RData"))
+load(here("out", "data", "compiled_data.RData"))
 
+
+
+# Summary ========================
+
+# vis_dat(data)
+# vis_miss(data)
+# 
+# data |> 
+#   filter(dataset == "glft_2016") |> 
+#   count(compartment, species, species_group) |> print(n=Inf)
+# 
+# data |> group_by(dataset, compartment) |> skimr::skim()
+# 
+# data |> filter(is.na(length_mm)) |> count(compartment, species) |> print(n=Inf)
