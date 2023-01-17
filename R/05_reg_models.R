@@ -11,6 +11,11 @@ ncores <- 5
 iter <- 2000
 
 
+# Data ============
+
+load(file = here("out", "data", "reg_mod_data_2015.RData"))
+
+
 # MODEL Structures ============================================================
 
 # Scale 1
