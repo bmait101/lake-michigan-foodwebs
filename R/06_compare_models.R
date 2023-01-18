@@ -15,21 +15,32 @@ str(brm_mods_2015[[1]][[1]]) # returns the model object, which is a list
 
 names(brm_mods_2015[[1]][[1]])
 
-  # Model comparison =================
+# Model comparison 2015 =================
 
 # compare the different models using different metrics elpd, looic, r2
+# List 5 and 8 are the 'b' analyses (pooled baselines, estimated by grouping)
 
-models_sub <- brm_mods_2015_01[1:3]
-models_sub <- brm_mods_2015_01[4:6]
-models_sub <- brm_mods_2015_01[7:9]
+# Scale 1
+models_sub <- brm_mods_2015[[1]][1:3]
+models_sub <- brm_mods_2015[[1]][4:6]
+models_sub <- brm_mods_2015[[1]][7:9]
+# Scale 1 - Ind
+models_sub <- brm_mods_2015[[2]][1:3]
 
-models_sub <- brm_mods_2015_02[1:5]
-models_sub <- brm_mods_2015_02[6:10]
-models_sub <- brm_mods_2015_02[11:15]
+# Scale 2
+models_sub <- brm_mods_2015[[3]][1:5]
+models_sub <- brm_mods_2015[[3]][6:10]
+models_sub <- brm_mods_2015[[3]][11:15]
+# Scale 2 - Ind
+models_sub <- brm_mods_2015[[4]][1:3]
 
-models_sub <- brm_mods_2015_03[1:5]
-models_sub <- brm_mods_2015_03[6:10]
-models_sub <- brm_mods_2015_03[11:15]
+# Scale 3
+models_sub <- brm_mods_2015[[6]][1:5]
+models_sub <- brm_mods_2015[[6]][6:10]
+models_sub <- brm_mods_2015[[6]][11:15]
+# Scale 3 - Ind
+models_sub <- brm_mods_2015[[7]][1:3]
+
 
 comp <- loo_compare(
   loo(models_sub[[1]]),
@@ -49,24 +60,23 @@ comp_summary <-
   print(comp, simplify = FALSE, digits = 3) %>%
   as.data.frame()
 
-model_sel_tab <- data.frame (elpd_diff = rep(NA, nrow(comp_summary)),
-                             elpd = rep(NA, nrow(comp_summary)),
-                             p_loo = rep(NA, nrow(comp_summary)),
-                             looic = rep(NA, nrow(comp_summary)),
-                             r2_loo = rep(NA, nrow(comp_summary)),
-                             r2_marg = rep(NA, nrow(comp_summary)),
-                             r2_cond = rep(NA, nrow(comp_summary)),
-                             row.names= rownames(comp_summary))
-
+model_sel_tab <- data.frame(
+  elpd_diff = rep(NA, nrow(comp_summary)),
+  elpd = rep(NA, nrow(comp_summary)),
+  p_loo = rep(NA, nrow(comp_summary)),
+  looic = rep(NA, nrow(comp_summary)),
+  r2_loo = rep(NA, nrow(comp_summary)),
+  r2_marg = rep(NA, nrow(comp_summary)),
+  r2_cond = rep(NA, nrow(comp_summary)),
+  row.names = rownames(comp_summary)
+  )
 
 model_sel_tab$elpd_diff <- paste (comp_summary$elpd_diff %>% round(digits=2), " (",
                                   comp_summary$se_diff %>% round(digits=2), ")",sep="")
 model_sel_tab$elpd <- paste (comp_summary$elpd_loo %>% round(digits=2), " (",
                              comp_summary$se_elpd_loo %>% round(digits=2), ")",sep="")
-
 model_sel_tab$p_loo <- paste (comp_summary$p_loo %>% round(digits=2)," (",
                               comp_summary$se_p_loo %>% round(digits=2), ")",sep="")
-
 model_sel_tab$looic <- paste (comp_summary$looic %>% round(digits=2)," (",
                               comp_summary$se_looic %>% round(digits=2), ")",sep="")
 
