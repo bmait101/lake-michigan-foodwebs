@@ -1,5 +1,5 @@
 
-
+names(reg_mod_data_2015)
 
 
 # Explore the relationships =================
@@ -15,7 +15,7 @@ best_model_num <- 2
 int_conditions <- list(
   Alpha_mode = setNames(c(.2, .8), c("Neashore", "Pelagic"))
 )
-p <- conditional_effects(models[[1]], "log_mass:Alpha_mode", 
+p <- conditional_effects(models_sub[[1]], "log_mass:Alpha_mode", 
                          int_conditions = int_conditions) 
 plot(p)
 
@@ -33,27 +33,27 @@ p$`log_mass:Alpha_mode` |>
   theme_clean()
 
 
-p <- conditional_effects(models[[4]], "Alpha_mode") 
+p <- conditional_effects(models_sub[[1]], "Alpha_mode", re_formula = NULL) 
 p$Alpha_mode |> 
   ggplot(aes(x = Alpha_mode, y = estimate__)) + 
   geom_ribbon(aes(ymin = lower__, ymax = upper__), fill = "grey90") +
   geom_line() + 
   geom_point(
-    data = df_mod, aes(x = Alpha_mode, y = TP_mode, fill = Alpha_mode),
+    data = reg_mod_data_2015[["scascale01_ind"]], aes(x = Alpha_mode, y = TP_mode, fill = Alpha_mode),
     size = 3, color = "black", shape = 21) +
   scale_fill_gradient(low="green", high = "blue") +
   labs(x = "Alpha", y = "Trophic Position") + 
   theme_clean()
 
 
-p <- conditional_effects(models[[7]], "Alpha_mode") 
+p <- conditional_effects(models_sub[[2]], "Alpha_mode",  re_formula = NULL) 
 p$Alpha_mode |> 
   mutate(across(c(estimate__, lower__, upper__), exp)) |> 
   ggplot(aes(x = Alpha_mode, y = estimate__)) + 
   geom_ribbon(aes(ymin = lower__, ymax = upper__), fill = "grey90") +
   geom_line() + 
   geom_point(
-    data = df_mod, aes(x = Alpha_mode, y = exp(log_mass), fill = Alpha_mode),
+    data = reg_mod_data_2015[["scale03a"]], aes(x = Alpha_mode, y = exp(log_mass), fill = Alpha_mode),
     size = 3, color = "black", shape = 21) +  
   scale_fill_gradient(low="green", high = "blue") +
   scale_y_log10(labels = scales::label_comma()) +
