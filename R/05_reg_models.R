@@ -13,7 +13,6 @@ iter <- 2000
 # Data ============
 
 load(file = here("out", "data", "reg_mod_data_2015.RData"))
-df_reg_mod_data_2015
 
 # MODEL Structures ============================================================
 
@@ -113,6 +112,7 @@ model_str_2015_03_ind <- list(
 
 # Fit models to data =========================================================
 
+start_time <- Sys.time()
 
 # 2015 - Scale 1
 brm_mods_2015_01 <- 
@@ -123,7 +123,7 @@ brm_mods_2015_01 <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[1]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -136,7 +136,7 @@ brm_mods_2015_01_ind <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[6]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -149,7 +149,7 @@ brm_mods_2015_02a <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[2]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -161,7 +161,7 @@ brm_mods_2015_02a_ind <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[7]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -174,7 +174,7 @@ brm_mods_2015_02b <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[3]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -187,7 +187,7 @@ brm_mods_2015_03a <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[4]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -199,7 +199,7 @@ brm_mods_2015_03a_ind <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[8]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
@@ -212,17 +212,30 @@ brm_mods_2015_03b <-
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
       df_reg_mod_data_2015[[5]], 
-      seed = 12345, chains = 4, iter = 100, thin = 1
+      seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
 
+end_time <- Sys.time()
+print(end_time - start_time)
 
-save(brm_mods_2015_01, file = here("out", "models", "brms", "2015_01.RData"))
-save(brm_mods_2015_01_ind, file = here("out", "models", "brms", "2015_01_ind.RData"))
-save(brm_mods_2015_02a, file = here("out", "models", "brms", "2015_02a.RData"))
-save(brm_mods_2015_02a_ind, file = here("out", "models", "brms", "2015_02a_ind.RData"))
-save(brm_mods_2015_02b, file = here("out", "models", "brms", "2015_02b.RData"))
-save(brm_mods_2015_03a, file = here("out", "models", "brms", "2015_03a.RData"))
-save(brm_mods_2015_03a_ind, file = here("out", "models", "brms", "2015_03a_ind.RData"))
-save(brm_mods_2015_03b, file = here("out", "models", "brms", "2015_03b.RData"))
+brm_mods_2015 <- list(
+  brm_mods_2015_01, 
+  brm_mods_2015_01_ind, 
+  brm_mods_2015_02a, 
+  brm_mods_2015_02a_ind, 
+  brm_mods_2015_02b, 
+  brm_mods_2015_03a, 
+  brm_mods_2015_03a_ind, 
+  brm_mods_2015_03b
+)
+
+# Give names to list datasets
+names(brm_mods_2015) <- c(
+  "scale01", "scale01_ind",
+  "scale02a", "scale02a_ind", "scale02b", 
+  "scale03a", "scale03a_ind", "scale03b"
+  )
+
+save(brm_mods_2015, file = here("out", "models", "brms", "brm_mods_2015.RData"))
 
