@@ -22,12 +22,10 @@ model_str_2015_01 <- list(
   bf(TP_mode ~ log_mass * Alpha_mode),
   bf(TP_mode ~ log_mass + Alpha_mode),
   bf(TP_mode ~ 1),
-  
   # Coupling of different energy pathways - TP
   bf(TP_mode ~ poly(Alpha_mode,2)),
   bf(TP_mode ~ poly(Alpha_mode,1)),
   bf(TP_mode ~ 1),
-  
   # Coupling of different energy pathways - Size
   bf(log_mass ~ poly(Alpha_mode,2)),
   bf(log_mass ~ poly(Alpha_mode,1)),
@@ -36,9 +34,9 @@ model_str_2015_01 <- list(
 
 model_str_2015_01_ind <- list(
 # Coupling of different energy pathways - TP
-  bf(TP_mode ~ poly(Alpha_mode,2)),
-  bf(TP_mode ~ poly(Alpha_mode,1)),
-  bf(TP_mode ~ 1)
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1)),
+  bf(TP_mode | weights(wei) ~ 1)
 )
 
 # Scale 2
@@ -49,14 +47,12 @@ model_str_2015_02 <- list(
   bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|lake_region)),
   bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|lake_region)),
   bf(TP_mode ~ 1 + (1|lake_region)),
-  
   # Coupling of different energy pathways - TP
   bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),
   bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),
   bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region)),
   bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region)),
   bf(TP_mode ~ 1 + (1|lake_region)),
-  
   # Coupling of different energy pathways - Size
   bf(log_mass ~ poly(Alpha_mode,2) + (1|lake_region)),
   bf(log_mass ~ poly(Alpha_mode,1) + (1|lake_region)),
@@ -68,11 +64,11 @@ model_str_2015_02 <- list(
 # Scale 2
 model_str_2015_02_ind <- list(
   # Coupling of different energy pathways - TP
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region)),
-  bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region)),
-  bf(TP_mode ~ 1 + (1|lake_region))
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (1|lake_region)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (1|lake_region)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region)),
+  bf(TP_mode | weights(wei) ~ 1 + (1|lake_region))
 )
 
 # Scale 3
@@ -83,14 +79,12 @@ model_str_2015_03 <- list(
   bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|lake_region) + (log_mass|season)),
   bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|lake_region) + (log_mass|season)),
   bf(TP_mode ~ 1 + (1|lake_region) + (1|season)),
-  
   # Coupling of different energy pathways - TP
   bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region) + (1|season)),
   bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region) + (1|season)),
   bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region) + (poly(Alpha_mode,2)|season)),
   bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region) + (poly(Alpha_mode,1)|season)),
   bf(TP_mode ~ 1 + (1|lake_region) + (1|season)),
-  
   # Coupling of different energy pathways - Size
   bf(log_mass ~ poly(Alpha_mode,2) + (1|lake_region) + (1|season)),
   bf(log_mass ~ poly(Alpha_mode,1) + (1|lake_region) + (1|season)),
@@ -101,11 +95,11 @@ model_str_2015_03 <- list(
 
 model_str_2015_03_ind <- list(
   # Coupling of different energy pathways - TP
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|lake_region) + (1|season)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|lake_region) + (1|season)),
-  bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region) + (poly(Alpha_mode,2)|season)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region) + (poly(Alpha_mode,1)|season)),
-  bf(TP_mode ~ 1 + (1|lake_region) + (1|season))
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (1|lake_region) + (1|season)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (1|lake_region) + (1|season)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region) + (poly(Alpha_mode,2)|season)),
+  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|lake_region) + (poly(Alpha_mode,1)|season)),
+  bf(TP_mode | weights(wei) ~ 1 + (1|lake_region) + (1|season))
 )
 
 
@@ -153,6 +147,7 @@ brm_mods_2015_02a <-
     )
   )
 
+# 2015 - Scale 2 Ind
 brm_mods_2015_02a_ind <- 
   model_str_2015_02_ind |> 
   map(
@@ -191,6 +186,7 @@ brm_mods_2015_03a <-
     )
   )
 
+# 2015 - Scale 3 Ind
 brm_mods_2015_03a_ind <- 
   model_str_2015_03_ind |> 
   map(
