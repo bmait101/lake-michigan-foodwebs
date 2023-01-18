@@ -57,20 +57,20 @@ tp_data_2015[[6]]
 # Data for HBMs models  ===================================================
 
 # Map over data and tp data
-df_reg_mod_data_2015 <- map2(data_subs_2015, tp_data_2015, avg_mass_and_merge)
+reg_mod_data_2015 <- map2(data_subs_2015, tp_data_2015, avg_mass_and_merge)
 
 # Give names to list datasets
-names(df_reg_mod_data_2015) <- c(
+names(reg_mod_data_2015) <- c(
   "scale01", "scale02a", "scale02b", "scale03a", "scale03b", 
   "scascale01_ind", "scascale02a_ind", "scascale03a_ind"
   )
 
 # Check it
-str(df_reg_mod_data_2015)
+str(reg_mod_data_2015)
 
 
 # Process the combined variables in each list element
-df_reg_mod_data_2015 <- df_reg_mod_data_2015 %>%
+reg_mod_data_2015 <- reg_mod_data_2015 %>%
   map(
     ~rename(., lake_region = scale)) |> 
   map(
@@ -85,24 +85,24 @@ df_reg_mod_data_2015 <- df_reg_mod_data_2015 %>%
             ~separate(.x, species, into = c("species", "season"), sep = "_")) 
 
 # Convert factors
-df_reg_mod_data_2015[[2]]$lake_region <- factor(df_reg_mod_data_2015[[2]]$lake_region)
-df_reg_mod_data_2015[[3]]$lake_region <- factor(df_reg_mod_data_2015[[3]]$lake_region)
-df_reg_mod_data_2015[[4]]$lake_region <- factor(df_reg_mod_data_2015[[4]]$lake_region)
-df_reg_mod_data_2015[[4]]$season <- factor(df_reg_mod_data_2015[[4]]$season)
-df_reg_mod_data_2015[[5]]$lake_region <- factor(df_reg_mod_data_2015[[5]]$lake_region)
-df_reg_mod_data_2015[[5]]$season <- factor(df_reg_mod_data_2015[[5]]$season)
-df_reg_mod_data_2015[[7]]$lake_region <- factor(df_reg_mod_data_2015[[7]]$lake_region)
-df_reg_mod_data_2015[[8]]$lake_region <- factor(df_reg_mod_data_2015[[8]]$lake_region)
-df_reg_mod_data_2015[[8]]$season <- factor(df_reg_mod_data_2015[[8]]$season)
+reg_mod_data_2015[[2]]$lake_region <- factor(reg_mod_data_2015[[2]]$lake_region)
+reg_mod_data_2015[[3]]$lake_region <- factor(reg_mod_data_2015[[3]]$lake_region)
+reg_mod_data_2015[[4]]$lake_region <- factor(reg_mod_data_2015[[4]]$lake_region)
+reg_mod_data_2015[[4]]$season <- factor(reg_mod_data_2015[[4]]$season)
+reg_mod_data_2015[[5]]$lake_region <- factor(reg_mod_data_2015[[5]]$lake_region)
+reg_mod_data_2015[[5]]$season <- factor(reg_mod_data_2015[[5]]$season)
+reg_mod_data_2015[[7]]$lake_region <- factor(reg_mod_data_2015[[7]]$lake_region)
+reg_mod_data_2015[[8]]$lake_region <- factor(reg_mod_data_2015[[8]]$lake_region)
+reg_mod_data_2015[[8]]$season <- factor(reg_mod_data_2015[[8]]$season)
 
-str(df_reg_mod_data_2015)
+str(reg_mod_data_2015)
 
-# save(df_reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
+# save(reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
 
 
 # Viz data for models =======================================
 
-df_reg_mod_data_2015[[1]] |>
+reg_mod_data_2015[[1]] |>
   # filter(!(species %in% c("deepwater sculpin", "oligochaete", "round goby", "lake whitefish"))) |>
   ggplot(aes(Alpha_mode, TP_mode)) +
   # ggplot(aes(Alpha_mode, mass_g)) +
