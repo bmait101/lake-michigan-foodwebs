@@ -28,6 +28,15 @@ avg_mass_and_merge <- function(data, tp_data) {
   out
 }
 
+assign_spp_weight <- function(data) {
+  data |> 
+    separate(species, into = c("ID", "species"), sep = "_") |> 
+    group_by(species) |> 
+    mutate(count = n()) |>
+    ungroup() |> 
+    mutate(wei = 1/count) |> 
+    select(-count)
+}
 
 # Data ===============
 
@@ -41,14 +50,15 @@ load(file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
 
 # Combine individual estimates with species levels
 tp_mods_2015_all <- c(tp_mods_2015, tp_mods_2015_ind)
+rm(tp_mods_2015); rm(tp_mods_2015_ind)
 data_subs_2015 <- c(data_subsets, data_subsets_ind)
-
+rm(data_subsets); rm(data_subsets_ind)
 
 
 # Extract TP data from Parallel ===========================
 
 # Summarize TP data
-tp_data_2015 <- tp_mods_2015_all |> map(summarize_TP_data)
+tp_data_2015 <- map(tp_mods_2015_all, summarize_TP_data)
 
 str(tp_data_2015)
 tp_data_2015[[6]]
@@ -61,7 +71,9 @@ reg_mod_data_2015 <- map2(data_subs_2015, tp_data_2015, avg_mass_and_merge)
 
 # Give names to list datasets
 names(reg_mod_data_2015) <- c(
-  "scale01", "scale02a", "scale02b", "scale03a", "scale03b", 
+  "scale01", 
+  "scale02a", "scale02b", 
+  "scale03a", "scale03b", 
   "scascale01_ind", "scascale02a_ind", "scascale03a_ind"
   )
 
@@ -70,39 +82,31 @@ str(reg_mod_data_2015)
 
 
 # Process the combined variables in each list element
-reg_mod_data_2015 <- reg_mod_data_2015 %>%
-  map(
-    ~rename(., lake_region = scale)) |> 
-  map(
-    ~separate(., lake_region, into = c("lake_region", "season"), sep = "_")) |> 
-  modify_if(function(y) any(is.na(y$season)), 
-            ~select(.x, -season)) |> 
-  modify_if(function(y) any(y$lake_region == "pooled"), 
-            ~select(.x, -lake_region)) |> 
-  modify_if(function(y) any(y$species == "alewife_north"), 
-            ~separate(.x, species, into = c("species", "lake_region"), sep = "_")) |> 
-  modify_if(function(y) any(y$species == "alewife_1"), 
-            ~separate(.x, species, into = c("species", "season"), sep = "_")) 
+reg_mod_data_2015 <- 
+  reg_mod_data_2015 %>%
+  map(~rename(., lake_region = scale)) |> 
+  map(~separate(., lake_region, into = c("lake_region", "season"), sep = "_")) |> 
+  modify_if(function(y) any(is.na(y$season)), ~ select(.x, -season)) |> 
+  modify_if(function(y) any(y$lake_region == "pooled"), ~ select(.x, -lake_region)) |> 
+  modify_at("scale02b", ~ separate(.x, species, into = c("species", "lake_region"), sep = "_")) |> 
+  modify_at("scale03b", ~ separate(.x, species, into = c("species", "season"), sep = "_")) |> 
+  # Assign spp weights to ind datasets
+  modify_at(c(6,7,8), ~ assign_spp_weight(.x)) |> 
+  # Convert factors
+  modify_if(~ any("lake_region" %in% colnames(.x)), ~ mutate(.x, lake_region = factor(lake_region))) |> 
+  modify_if(~ any("season" %in% colnames(.x)), ~ mutate(.x, season = factor(season))) 
 
-# Convert factors
-reg_mod_data_2015[[2]]$lake_region <- factor(reg_mod_data_2015[[2]]$lake_region)
-reg_mod_data_2015[[3]]$lake_region <- factor(reg_mod_data_2015[[3]]$lake_region)
-reg_mod_data_2015[[4]]$lake_region <- factor(reg_mod_data_2015[[4]]$lake_region)
-reg_mod_data_2015[[4]]$season <- factor(reg_mod_data_2015[[4]]$season)
-reg_mod_data_2015[[5]]$lake_region <- factor(reg_mod_data_2015[[5]]$lake_region)
-reg_mod_data_2015[[5]]$season <- factor(reg_mod_data_2015[[5]]$season)
-reg_mod_data_2015[[7]]$lake_region <- factor(reg_mod_data_2015[[7]]$lake_region)
-reg_mod_data_2015[[8]]$lake_region <- factor(reg_mod_data_2015[[8]]$lake_region)
-reg_mod_data_2015[[8]]$season <- factor(reg_mod_data_2015[[8]]$season)
 
 str(reg_mod_data_2015)
 
-# save(reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
+
+
+save(reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
 
 
 # Viz data for models =======================================
 
-reg_mod_data_2015[[1]] |>
+reg_mod_data_2015[[6]] |>
   # filter(!(species %in% c("deepwater sculpin", "oligochaete", "round goby", "lake whitefish"))) |>
   ggplot(aes(Alpha_mode, TP_mode)) +
   # ggplot(aes(Alpha_mode, mass_g)) +
@@ -115,7 +119,4 @@ reg_mod_data_2015[[1]] |>
   # scale_y_log10(labels = scales::label_comma()) +
   # ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50, size=3) +
   theme_clean()
-
-
-
 
