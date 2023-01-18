@@ -1,7 +1,21 @@
 
+# Prep ====================
 
+source(here::here("R", "00_prep.R"))
 
-# Model comparison =================
+load(file = here("out", "data", "reg_mod_data_2015.RData"))
+load(file = here("out", "models", "brms", "brm_mods_2015.RData"))
+
+df_reg_mod_data_2015
+names(brm_mods_2015)
+
+brm_mods_2015[[8]] # this is list of 9 each is a model object, which is a list
+str(brm_mods_2015[[1]][1]) # returns list of 1, which is list of 22
+str(brm_mods_2015[[1]][[1]]) # returns the model object, which is a list
+
+names(brm_mods_2015[[1]][[1]])
+
+  # Model comparison =================
 
 # compare the different models using different metrics elpd, looic, r2
 
