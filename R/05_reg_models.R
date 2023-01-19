@@ -116,7 +116,7 @@ brm_mods_2015_01 <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[1]], 
+      reg_mod_data_2015[["scale01"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -129,7 +129,7 @@ brm_mods_2015_01_ind <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[6]], 
+      reg_mod_data_2015[["scascale01_ind"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -142,7 +142,7 @@ brm_mods_2015_02a <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[2]], 
+      reg_mod_data_2015[["scale02a"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -155,7 +155,7 @@ brm_mods_2015_02a_ind <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[7]], 
+      reg_mod_data_2015[["scascale02a_ind"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -168,7 +168,7 @@ brm_mods_2015_02b <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[3]], 
+      reg_mod_data_2015[["scale02b"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -181,7 +181,7 @@ brm_mods_2015_03a <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[4]], 
+      reg_mod_data_2015[["scale03a"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -194,7 +194,7 @@ brm_mods_2015_03a_ind <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[8]], 
+      reg_mod_data_2015[["scascale03a_ind"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
@@ -207,7 +207,7 @@ brm_mods_2015_03b <-
       .,
       cores = ncores,
       control = list(adapt_delta = 0.99, max_treedepth = 20),
-      reg_mod_data_2015[[5]], 
+      reg_mod_data_2015[["scale03b"]], 
       seed = 12345, chains = 4, iter = iter, thin = 1
     )
   )
