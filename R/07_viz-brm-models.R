@@ -39,7 +39,7 @@ p$Alpha_mode |>
   geom_ribbon(aes(ymin = lower__, ymax = upper__), fill = "grey90") +
   geom_line() + 
   geom_point(
-    data = reg_mod_data_2015[["scascale01_ind"]], aes(x = Alpha_mode, y = TP_mode, fill = Alpha_mode),
+    data = reg_mod_data_2015[["scale03b"]], aes(x = Alpha_mode, y = TP_mode, fill = Alpha_mode),
     size = 3, color = "black", shape = 21) +
   scale_fill_gradient(low="green", high = "blue") +
   labs(x = "Alpha", y = "Trophic Position") + 
