@@ -41,12 +41,13 @@ for (i in 1:length(data_subs_14_16)){ # change object based on data subset objec
 
 # Out list (change object name depending on data)
 # tp_mods_2015 <- list()
-tp_mods_2015_ind <- list()
+# tp_mods_2015_ind <- list()
+tp_mods_14_16 <- list()
 
 # Loop over datasets
 for (i in 1:length(iso_lists)){ # change object based on data subset object 
   start_time <- Sys.time()
-  tp_mods_2015_ind[[i]] <- parLapply(
+  tp_mods_14_16[[i]] <- parLapply(
     cl, 
     iso_lists[[i]],  # change object based on data subset object 
     multiModelTP,
@@ -60,5 +61,7 @@ for (i in 1:length(iso_lists)){ # change object based on data subset object
 }
 
 # Save
-save(tp_mods_2015, file = here("out", "models", "tp", "tp_mods_2015.RData"))
-save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
+# save(tp_mods_2015, file = here("out", "models", "tp", "tp_mods_2015.RData"))
+# save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
+save(tp_mods_14_16, file = here("out", "models", "tp", "tp_mods_14_16.RData"))
+
