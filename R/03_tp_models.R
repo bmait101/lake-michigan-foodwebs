@@ -11,18 +11,19 @@ cl <- parallel::makePSOCKcluster(parallel::detectCores())
 
 # Data ===============================
 
-# Load prepped data subsets (ind is seperate b/c the run for hours)
+# Load prepped data subsets (ind is separate b/c the run for hours)
 
-load(file = here("out", "models", "tp", "tp_data_subs_2015.RData"))
-load(file = here("out", "models", "tp", "tp_data_subs_2015_ind.RData"))
+# load(file = here("out", "models", "tp", "tp_data_subs_2015.RData"))
+# load(file = here("out", "models", "tp", "tp_data_subs_2015_ind.RData"))
+load(file = here("out", "models", "tp", "data_subs_14_16.RData"))
 
 
 # Extract iso data =======================================================
 
 iso_lists <- list()
-for (i in 1:length(data_subsets_ind)){ # change object based on data subset object 
+for (i in 1:length(data_subs_14_16)){ # change object based on data subset object 
   iso_lists[[i]] <- extractIsotopeData(
-    data_subsets_ind[[i]],  # change object based on data subset object 
+    data_subs_14_16[[i]],  # change object based on data subset object 
     b1 = "b1", 
     b2 = "b2", 
     baselineColumn = "trophic", 
@@ -33,8 +34,8 @@ for (i in 1:length(data_subsets_ind)){ # change object based on data subset obje
   )
 }
 
-# summary(iso_lists[[3]])
-# plot(iso_lists[[3]]$`north_2-3072_bloater`)
+# summary(iso_lists[[5]])
+# plot(iso_lists[[3]]$`pooled-lake trout_2_south`)
 
 # Run two baseline model =======================================================
 
