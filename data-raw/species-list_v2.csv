@@ -1,0 +1,76 @@
+﻿taxon_code,species_lifestage,common name,species,taxonomic group,trophic group,foraging habitat,functional group
+pom,pom,pom,,,organic matter,,pom
+phy,green algae,green algae,,,primary producer,,phytoplankton
+phy,picoplankton,picoplankton,,,primary producer,,phytoplankton
+alg,cladophora,cladophora,,,primary producer,,macro-alga
+zop,rotifer,rotifer,,,primary consumer,,zooplankton
+zop,copepods,copepods,,,primary consumer,,zooplankton
+byt,bythotrephes,bythotrephes,Bythotrephes longimanus,,,,zooplankton
+mys,mysis,mysis,,,,,zooplankton
+ha,hemimysis adult,hemimysis,,,,,zooplankton
+hj,hemimysis juvenile,hemimysis,,,,,zooplankton
+zop63,zooplankton_63um,zooplankton,,,,,zooplankton
+zop153,zooplankton_153um,zooplankton,,,,,zooplankton
+zop,zooplankton,zooplankton,,,,,zooplankton
+inv,bentic inverts,bentic inverts,,,,,benthic inverts
+amp,amphipod,amphipod,,,,,benthic inverts
+chr,chironomid,chironomid,,,,,benthic inverts
+olg,oligochaete,oligochaete,,,,,benthic inverts
+sna,snail,snail,,,,,benthic inverts
+mus_z,zebra,dreissenids,Dreissena polymorpha,,,,benthic inverts
+mus_q,quagga,dreissenids,Dreissena bugensis,,,,benthic inverts
+mus,dreissenids,dreissenids,,,,,benthic inverts
+musl,dreissenids_lg,dreissenids,,,,,benthic inverts
+musm,dreissenids_med,dreissenids,,,,,benthic inverts
+muss,dreissenids_sm,dreissenids,,,,,benthic inverts
+cra,crayfish,crayfish,,,,,benthic inverts
+iso,isopod,isopod,,,,,benthic inverts
+lee,leech,leech,,,,,benthic inverts
+dip,dipteran,dipteran,,,,,benthic inverts
+hyd,hydracarina,hydracarina,,,,,benthic inverts
+AIP,alewife plankton,alewife,,,,,fishes
+ALE,alewife,alewife,,,,,fishes
+ALEl,alewife_lg,alewife,,,,,fishes
+ALEs,alewife_sm,alewife,,,,,fishes
+BIP,bloater plankton,bloater,,,,,fishes
+BLO,bloater,bloater,,,,,fishes
+BLOl,bloater_lg,bloater,,,,,fishes
+BLOs,bloater_sm,bloater,,,,,fishes
+BUT,burbot,bloater,,,,,fishes
+DIP,deepwater sculpin plankton,deepwater sculpin,,,,,fishes
+DWS,deepwater sculpin,deepwater sculpin,,,,,fishes
+LAT,lake trout,lake trout,,,,,fishes
+LWF,lake whitefish,lake whitefish,,,,,fishes
+RAS,rainbow smelt,rainbow smelt,,,,,fishes
+ROG,round goby,round goby,,,,,fishes
+SLS,slimy sculpin,slimy sculpin,,,,,fishes
+SMSl,slimy sculpin_lg,slimy sculpin,,,,,fishes
+SMSs,slimy sculpin_sm,slimy sculpin,,,,,fishes
+SPS,spottail shiner,spottail shiner,,,,,fishes
+WHS,white sucker,white sucker,,,,,fishes
+YEP,yellow perch,yellow perch,,,,,fishes
+CHS,chinook salmon,chinook salmon,,,,,fishes
+RBT,rainbow trout,rainbow trout,,,,,fishes
+COS,coho salmon,coho salmon,,,,,fishes
+WAE,walleye,walleye,,,,,fishes
+PKS,pks,pks,,,,,fishes
+ATS,atlantic salmon,atlantic salmon,,,,,fishes
+BNT,brown trout,brown trout,,,,,fishes
+NSB,ninespine stickleback,ninespine stickleback,,,,,fishes
+GZS,gizzard shad,gizzard shad,,,,,fishes
+STS,brook stickleback,brook stickleback,,,,,fishes
+msc,mottled sculpin,mottled sculpin,,,,,fishes
+TSS,threespine stickleback,threespine stickleback,,,,,fishes
+gsh,golden shiner,golden shiner,,,,,fishes
+lns,longnose sucker,longnose sucker,,,,,fishes
+rwf,round whitefish,round whitefish,,,,,fishes
+lkc,lake chub,lake chub,,,,,fishes
+fwd,freshwater drum,freshwater drum,,,,,fishes
+srh,shorthead redhorse,shorthead redhorse,,,,,fishes
+chc,channel catfish,channel catfish,,,,,fishes
+bss,brook silverside,brook silverside,,,,,fishes
+whp,white perch,white perch,,,,,fishes
+smb,smallmouth bass,smallmouth bass,,,,,fishes
+bkf,banded killifish,banded killifish,,,,,fishes
+fhm,fathead minnow,fathead minnow,,,,,fishes
+lnd,longnose dace,longnose dace,,,,,fishes
