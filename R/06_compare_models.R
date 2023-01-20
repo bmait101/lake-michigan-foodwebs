@@ -135,6 +135,13 @@ models_sub_02 <- list(
   brm_mods_2015[["scale02a_ind"]]
 )
 
+models_sub_02b <- list(
+  brm_mods_2015[["scale02b"]][1:5],
+  brm_mods_2015[["scale02b"]][6:10],
+  brm_mods_2015[["scale02b"]][11:15],
+  brm_mods_2015[["scale02b_ind"]]
+)
+
 models_sub_03 <- list(
   brm_mods_2015[["scale03a"]][1:5],
   brm_mods_2015[["scale03a"]][6:10],
@@ -142,9 +149,18 @@ models_sub_03 <- list(
   brm_mods_2015[["scale03a_ind"]]
 )
 
+models_sub_03b <- list(
+  brm_mods_2015[["scale03b"]][1:5],
+  brm_mods_2015[["scale03b"]][6:10],
+  brm_mods_2015[["scale03b"]][11:15],
+  brm_mods_2015[["scale03b_ind"]]
+)
+
 
 mod_sel_tab_2015_scale02 <- models_sub_02 |> map(make_model_sel_tbl_ranef)
+# mod_sel_tab_2015_scale02b <- models_sub_02b |> map(make_model_sel_tbl_ranef)
 mod_sel_tab_2015_scale03 <- models_sub_03 |> map(make_model_sel_tbl_ranef)
+# mod_sel_tab_2015_scale03b <- models_sub_03b |> map(make_model_sel_tbl_ranef)
 
 
 # Export tables =======================================================
@@ -165,6 +181,14 @@ bind_rows(
 ) |> 
   write_csv(here("out", "tbls", "model_sel_tbl_2015_scale02.csv"))
 
+# bind_rows(
+#   mod_sel_tab_2015_scale02b[[1]], 
+#   mod_sel_tab_2015_scale02b[[2]],
+#   mod_sel_tab_2015_scale02b[[4]],  #ind
+#   mod_sel_tab_2015_scale02b[[3]]
+# ) |> 
+#   write_csv(here("out", "tbls", "model_sel_tbl_2015_scale02b.csv"))
+
 bind_rows(
   mod_sel_tab_2015_scale03[[1]], 
   mod_sel_tab_2015_scale03[[2]],
@@ -172,4 +196,12 @@ bind_rows(
   mod_sel_tab_2015_scale03[[3]]
 ) |> 
   write_csv(here("out", "tbls", "model_sel_tbl_2015_scale03.csv"))
+
+# bind_rows(
+#   mod_sel_tab_2015_scale03b[[1]], 
+#   mod_sel_tab_2015_scale03b[[2]],
+#   mod_sel_tab_2015_scale03b[[4]],  #ind
+#   mod_sel_tab_2015_scale03b[[3]]
+# ) |> 
+#   write_csv(here("out", "tbls", "model_sel_tbl_2015_scale03b.csv"))
 
