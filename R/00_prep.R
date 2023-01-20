@@ -5,6 +5,7 @@ pacman::p_load(
   tidyverse,  # ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
   readxl, # read excels files
   patchwork, # plot composition
+  ggnewscale, # use multiple scales in ggplot2
   MetBrewer, # artsy palettes
   fishualize,  # fishy palletts
   janitor,  # cleaning data
@@ -42,19 +43,6 @@ xref_sci_names <-
   mutate(common_name = str_to_lower(common_name))
 
 
-# custom plotting theme
-theme_clean <- function() {
-  theme_minimal(base_size = 16) +
-    theme(
-      plot.background = element_rect(fill = "white", color = NA), 
-      panel.border = element_blank(),
-      panel.grid.minor = element_blank(),
-      plot.title = element_text(face = "bold"),
-      axis.title = element_text(face = "bold"),
-      strip.text = element_text(face = "bold", size = rel(1), hjust = 0),
-      strip.background = element_rect(fill = "grey80", color = NA),
-      legend.title = element_text(face = "bold"))
-}
 
 
 
