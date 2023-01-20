@@ -7,7 +7,7 @@ source(here::here("R", "00_prep.R"))
 # Controls ===================
 
 ncores <- 5
-iter <- 2000
+iter <- 4000
 
 
 # Data ============
