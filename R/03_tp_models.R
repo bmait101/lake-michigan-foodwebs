@@ -13,12 +13,14 @@ cl <- parallel::makePSOCKcluster(parallel::detectCores())
 
 # Load prepped data subsets (ind is separate b/c the run for hours)
 
-# load(file = here("out", "models", "tp", "tp_data_subs_2015.RData"))
-# load(file = here("out", "models", "tp", "tp_data_subs_2015_ind.RData"))
-load(file = here("out", "models", "tp", "data_subs_14_16.RData"))
+load(file = here("out", "data", "data_subs_2015.RData"))
+load(file = here("out", "data", "data_subs_2015_ind.RData"))
+# load(file = here("out", "models", "tp", "data_subs_14_16.RData"))
 
 
 # Extract iso data =======================================================
+
+# change object based on data subset object 
 
 iso_lists <- list()
 for (i in 1:length(data_subs_14_16)){ # change object based on data subset object 
