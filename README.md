@@ -29,6 +29,8 @@ Collaborators:
 **out**
 - Contains output created using script in the R folder
 - Because they are too large, estimate model objects from tRophicposion and brms are not uploaded. They can be downloaded [here](https://drive.google.com/drive/folders/1oCmnLMbQSnCN5oI8_hBjcKneRu_XxpSW?usp=sharing). 
+  - the brm_mods_2015.RData file should be put into out/models/brms dir. 
+  - the tp models must be unzipped and put into the out/models/tp dir. 
 
 **img**
 
