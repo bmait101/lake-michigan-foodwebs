@@ -1,4 +1,12 @@
 
+# Prep and data
+source(here::here("R", "00_prep.R"))
+
+# Model objects
+load(file = here("out", "models", "brms", "brm_mods_2015.RData"))
+# Data for plotting
+load(file = here("out", "data", "reg_mod_data_2015.RData"))
+
 
 # custom plotting theme
 theme_clean <- function() {
