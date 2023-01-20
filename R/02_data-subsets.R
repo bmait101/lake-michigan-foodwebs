@@ -32,8 +32,8 @@ df <- data |>
 df_2015 <- df |> 
   filter(dataset %in% c("csmi_2015", "nps_2015"))
 
-df_14_16 <- df |> 
-  filter(dataset %in% c("csmi_2015", "nps_2015", "kornis_2014", "glft_2016"))
+# df_14_16 <- df |> 
+#   filter(dataset %in% c("csmi_2015", "nps_2015", "kornis_2014", "glft_2016"))
 
 # 2015 data ----------------------------------------------
 
@@ -91,49 +91,49 @@ names(data_subs_15_ind) <- c(
   "scale01_ind", "scale02_ind", "scale03_ind"
 )
 
-save(data_subs_15_ind, file = here("out", "models", "tp", "data_subs_2015_ind.RData"))
+save(data_subs_15_ind, file = here("out", "data", "data_subs_2015_ind.RData"))
 
 
 
 # 2014-2016 data ----------------------------------------------
 
-data_subs_14_16 <- list(
-  # Scale 1 - pooled across lake region and seasons and years
-  df_14_16 |> 
-    mutate(scale = "pooled") |>
-    droplevels() |> 
-    as.data.frame(),
-  # Scale 2 - by lake region but with pooled baselines from 2015
-  df_14_16 |> 
-    mutate(scale = "pooled") |>
-    mutate(species = paste(species, lake_region, sep = "_")) |>
-    droplevels() |> 
-    as.data.frame(),
-  # Scale 3 - by region and season by with baselines from 2015
-  df_14_16 |> 
-    mutate(scale = "pooled") |>
-    mutate(species = paste(species, season, lake_region, sep = "_")) |>
-    droplevels() |> 
-    as.data.frame(),
-  # Scale 4 - by basin and season and year with baselines from 2015
-  df_14_16 |> 
-    mutate(scale = "pooled") |>
-    mutate(species = paste(species, season, lake_region, year, sep = "_")) |>
-    droplevels() |>  
-    as.data.frame(),
-  # Scale ind - by basin and season and year with baselines from 2015
-  df_14_16 |> 
-    mutate(scale = "pooled") |>
-    mutate(species = paste(ID, species, season, lake_region, year, sep = "_")) |>
-    droplevels() |>  
-    as.data.frame()
-  )
-
-names(data_subs_14_16) <- c(
-  "scale01", "scale02", "scale03", "scale04", "scale05"
-  )
-
-save(data_subs_14_16, file = here("out", "models", "tp", "data_subs_14_16.RData"))
+# data_subs_14_16 <- list(
+#   # Scale 1 - pooled across lake region and seasons and years
+#   df_14_16 |> 
+#     mutate(scale = "pooled") |>
+#     droplevels() |> 
+#     as.data.frame(),
+#   # Scale 2 - by lake region but with pooled baselines from 2015
+#   df_14_16 |> 
+#     mutate(scale = "pooled") |>
+#     mutate(species = paste(species, lake_region, sep = "_")) |>
+#     droplevels() |> 
+#     as.data.frame(),
+#   # Scale 3 - by region and season by with baselines from 2015
+#   df_14_16 |> 
+#     mutate(scale = "pooled") |>
+#     mutate(species = paste(species, season, lake_region, sep = "_")) |>
+#     droplevels() |> 
+#     as.data.frame(),
+#   # Scale 4 - by basin and season and year with baselines from 2015
+#   df_14_16 |> 
+#     mutate(scale = "pooled") |>
+#     mutate(species = paste(species, season, lake_region, year, sep = "_")) |>
+#     droplevels() |>  
+#     as.data.frame(),
+#   # Scale ind - by basin and season and year with baselines from 2015
+#   df_14_16 |> 
+#     mutate(scale = "pooled") |>
+#     mutate(species = paste(ID, species, season, lake_region, year, sep = "_")) |>
+#     droplevels() |>  
+#     as.data.frame()
+#   )
+# 
+# names(data_subs_14_16) <- c(
+#   "scale01", "scale02", "scale03", "scale04", "scale05"
+#   )
+# 
+# save(data_subs_14_16, file = here("out", "data", "data_subs_14_16.RData"))
 
 
 # Viz data ----------------------------
