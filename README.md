@@ -1,6 +1,6 @@
 # Lake Michigan Food Web Architecture
 
-<img align="right" src="docs/img/Lake_Michigan_bathymetry_map.png" alt="lm-bathy" width="300" style="margin-top: 20px">
+<img align="right" src="img/Lake_Michigan_bathymetry_map.png" alt="lm-bathy" width="300" style="margin-top: 20px">
 
 Repo for Lake Michigan Food Web Architecture project. 
 
@@ -19,4 +19,17 @@ Collaborators:
 
 **R:** 
 - Contains .R files to clean data, run analyses, and make figures. 
-- Run 00_prep.R before running any other scripts.
+- Run R/00_prep.R before running any other scripts.
+- R/03_tp_models takes ~12 hours to run (individual models ~ 8 hours)
+- R/05_brms_models takes ~ 2 hours to run
+
+**data-raw**
+- Contains raw, flat data files
+
+**out**
+- Contains output created using script in the R folder
+- Because they are too large, estimate model objects from tRophicposion and brms are not uploaded. They can be downloaded [here](https://drive.google.com/drive/folders/1oCmnLMbQSnCN5oI8_hBjcKneRu_XxpSW?usp=sharing). 
+
+**img**
+
+- images used in project
