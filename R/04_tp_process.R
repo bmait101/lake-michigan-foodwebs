@@ -106,17 +106,16 @@ save(reg_mod_data_2015, file = here("out", "data", "reg_mod_data_2015.RData"))
 
 # Viz data for models =======================================
 
-reg_mod_data_2015[["scale03a"]] |>
-  # filter(!(species %in% c("deepwater sculpin", "oligochaete", "round goby", "lake whitefish"))) |>
+reg_mod_data_2015[["scale01"]] |>
+  # ggplot(aes(mass_g, TP_mode)) +
   # ggplot(aes(Alpha_mode, TP_mode)) +
-  # ggplot(aes(Alpha_mode, mass_g)) +
-  ggplot(aes(mass_g, TP_mode)) +
+  ggplot(aes(Alpha_mode, mass_g)) +
   geom_smooth(method = "lm", formula = "y ~ poly(x, 2)", color = "black") +
   geom_point(size = 3, alpha = 0.5) +
   # geom_point(size = 3, alpha = 0.5, aes(color = lake_region)) +
   # geom_point(size = 3, alpha = 0.5, aes(color = season, shape = lake_region)) +
-  scale_x_log10(labels = scales::label_comma()) +
-  # scale_y_log10(labels = scales::label_comma()) +
+  # scale_x_log10(labels = scales::label_comma()) +
+  scale_y_log10(labels = scales::label_comma()) +
   # ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50, size=3) +
   theme_clean()
 
