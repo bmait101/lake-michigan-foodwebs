@@ -28,7 +28,7 @@ source(here::here("R", "00_prep.R"))
 # # Read raw data
 # raw_csmi_2015 <-
 #   read_xlsx(
-#     here("data","raw-CSMI-2015.xlsx"),
+#     here("data-raw","raw-CSMI-2015.xlsx"),
 #     sheet = "Combined UF MED"
 #   ) |>
 #   cleans_names_and_caps()
@@ -216,7 +216,7 @@ df_csmi_2015_clean <-
 # Read data
 raw_uwm_2002_fish <- 
   read_xlsx(
-    here("data","raw_turschak_maitland_query.xlsx"), 
+    here("data-raw","raw_turschak_maitland_query.xlsx"), 
     sheet = "2002-2003 SIA Data") |> 
   cleans_names_and_caps()
 
@@ -282,7 +282,7 @@ df_uwm_2002_fish <- df_uwm_2002_fish |>
 # Read data
 raw_uwm_2010_fish <-
   read_xlsx(
-    here("data","raw_bootsma_2010_2011_fish.xlsx"),
+    here("data-raw","raw_bootsma_2010_2011_fish.xlsx"),
     sheet = "FishSIResults2010_2011")|>
   cleans_names_and_caps()
 
@@ -369,7 +369,7 @@ df_uwm_2010_fish <- df_uwm_2010_fish |>
 # Read data
 raw_uwm_2010_benthic <- read_xlsx(
   here(
-    "data",
+    "data-raw",
     "raw_Nearshore seston and benthos stable isotopes 2010 for Bryan Maitland.xlsx"), 
   sheet = "Benthic", 
   skip = 6
@@ -525,7 +525,7 @@ df_uwm_2010_benthic <- df_uwm_2010_benthic |>
 # Read data
 raw_kornis_2014 <- 
   read_xlsx(
-    here("data","raw_Kornis et al 2014 isotope data.xlsx"), 
+    here("data-raw","raw_Kornis et al 2014 isotope data.xlsx"), 
     sheet = "Kornis et al. data spreadsheet"
   ) |> 
   cleans_names_and_caps()
@@ -625,7 +625,7 @@ df_kornis_2014 <- df_kornis_2014 |>
 # Read data
 raw_nps_2015_salmonids <- 
   read_csv(
-    here("data", "raw_Salmonine_Isotope_2015.csv")
+    here("data-raw", "raw_Salmonine_Isotope_2015.csv")
     ) |> 
   cleans_names_and_caps()
 
@@ -697,7 +697,7 @@ df_nps_2015_salmonids <- df_nps_2015_salmonids |>
 # Read data
 raw_glft_2016_fish <- 
   read_xlsx(
-    here("data","raw_turschak_maitland_query.xlsx"), 
+    here("data-raw","raw_turschak_maitland_query.xlsx"), 
     sheet = "2016_GLFT_Data_Query"
     ) |> 
   cleans_names_and_caps()
@@ -761,7 +761,7 @@ df_glft_2016_fish <- df_glft_2016_fish |>
 
 # Read data
 raw_roth_2019_fish <- read_csv(
-  here("data", "raw-Roth-2019.csv")
+  here("data-raw", "raw-Roth-2019.csv")
   ) |> 
   cleans_names_and_caps() 
 
