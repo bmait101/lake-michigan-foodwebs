@@ -41,8 +41,8 @@ vignettes/*.pdf
 # Mac OS
 *.DS_Store
 
-/data
-/out
+# model objects are too big to host on GitHub
+/out/models
 /img
 /docs
 
