@@ -63,7 +63,7 @@ for (i in 1:length(iso_lists)){ # change object based on data subset object
 }
 
 # Save
-# save(tp_mods_2015, file = here("out", "models", "tp", "tp_mods_2015.RData"))
-# save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
-save(tp_mods_14_16, file = here("out", "models", "tp", "tp_mods_14_16.RData"))
+save(tp_mods_2015, file = here("out", "models", "tp", "tp_mods_2015.RData"))
+save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
+# save(tp_mods_14_16, file = here("out", "models", "tp", "tp_mods_14_16.RData"))
 
