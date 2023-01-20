@@ -234,4 +234,4 @@ names(brm_mods_2015) <- c(
 
 
 save(brm_mods_2015, file = here("out", "models", "brms", "brm_mods_2015.RData"))
-load(file = here("out", "models", "brms", "brm_mods_2015.RData"))
+# load(file = here("out", "models", "brms", "brm_mods_2015.RData"))
