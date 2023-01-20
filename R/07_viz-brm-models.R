@@ -1,6 +1,4 @@
 
-library(ggnewscale)
-
 
 # custom plotting theme
 theme_clean <- function() {
@@ -10,7 +8,7 @@ theme_clean <- function() {
 
 # Global plot settings
 
-pointsize = 4
+pointsize = 3
 linesize = 1
 point_col = "black"
 littoral = "green"
@@ -22,8 +20,8 @@ ribbon_col = "darkgrey"
 # global grand mean - average predicted outcome ignoring group deviations
 # aka average marginal effects
 
-names(brm_mods_2015)
-names(reg_mod_data_2015)
+# names(brm_mods_2015)
+# names(reg_mod_data_2015)
 
 # Hypothesis 1 - Asymmetric TP-body size relationship --------------------------
 
@@ -101,7 +99,7 @@ plot_p2 <- function(mods, data) {
       data = data, aes(x = Alpha_mode, y = TP_mode, fill = Alpha_mode),
       size = pointsize, color = point_col, shape = 21) +
     scale_fill_gradient(low = littoral, high = pelagic) +
-    coord_cartesian(ylim = c(.8, 5)) +
+    coord_cartesian(ylim = c(min(data$TP_mode), max(data$TP_mode)+.5)) +
     labs(title = "Coupling - TP (spp. level)", 
          x = "Alpha", y = "Trophic Position", fill = "Alpha") + 
     theme_clean() + 
@@ -132,7 +130,7 @@ plot_p3 <- function(mods, data) {
       size = pointsize, color = point_col, shape = 21) +
     geom_line(size = linesize) + 
     scale_fill_gradient(low = littoral, high = pelagic) +
-    coord_cartesian(ylim = c(.8, 5)) +
+    coord_cartesian(ylim = c(min(data$TP_mode), max(data$TP_mode)+.5)) +
     labs(title = "Coupling - TP (ind. level)", 
          x = "Alpha", y = "Trophic Position", fill = "Alpha") + 
     theme_clean() + 
