@@ -1,6 +1,6 @@
 # Lake Michigan Food Web Architecture
 
-<img align="right" src="img/Lake_Michigan_bathymetry_map.png" alt="lm-bathy" width="300" style="margin-top: 20px">
+<img align="right" src="img/LM_bathy-map.png" alt="lm-bathy" width="300" style="margin-top: 20px">
 
 Repo for Lake Michigan Food Web Architecture project. 
 
