@@ -66,7 +66,7 @@ names(data_subs_15) <- c(
   "scale01", "scale02a", "scale02b", "scale03a", "scale03b"
   )
 
-save(data_subs_15, file = here("out", "models", "tp", "data_subs_2015.RData"))
+save(data_subs_15, file = here("out", "data", "data_subs_2015.RData"))
 
 # Individual levels
 data_subs_15_ind <- list(
