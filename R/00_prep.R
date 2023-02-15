@@ -39,7 +39,7 @@ xref_compartments <-
 
 # load scientific names
 xref_sci_names <- 
-  read.csv(here("data-raw", "xref_fish_species_names.csv")) |> 
+  read.csv(here("data-raw", "xref_species_names.csv")) |> 
   mutate(common_name = str_to_lower(common_name))
 
 
