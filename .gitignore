@@ -46,5 +46,12 @@ vignettes/*.pdf
 /img
 /docs
 /slides
+/notes
+/data-raw
+/out
+
+# obsidian notes
+.obsidian/
+
 
 
