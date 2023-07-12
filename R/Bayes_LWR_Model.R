@@ -10,26 +10,43 @@ pacman::p_load(here, tidyverse, rfishbase, R2jags)
 
 # Prep -----
 
-# List of our species
-xref_spp <- read.csv(here("data", "spp_xref.csv")) |> 
-  mutate(common_name = str_to_lower(common_name))
+### List of our species
+List_fish <- read.csv(here("data-raw", "spp_xref_v2.csv"))  |> 
+  select(Species=sci_name) |> 
+  as.data.frame()
+List_fish
 
-List_fish <- xref_spp |> select(Species=sci_name) |> as.data.frame()
+xref <- species(List_fish$Species) |> 
+  select(SpecCode, Species, FamCode) |> 
+  separate(Species, into = c("Genus", "Ep_specific")) |> 
+  mutate(Species = paste(Genus, Ep_specific, sep = "_")) |> 
+  relocate(Species, .after = SpecCode)
+xref
 
-# Extract species & bodyshape columns from morphology database (fishbase)  
-shape_fish <- morphology()[,c(2,13)]
+### Extract species & bodyshape columns from morphology database (fishbase)  
+shape_fish <- morphology()[,c(2,12)]
+shape_fish
 
-# Extract length-weight relationships available from fishbase
+### Extract length-weight relationships available from fishbase
 # data_LL <- length_length()
 # data_LL <- subset(data_LL, Species %in% List_fish$Species)
 data_LW <- length_weight()
+data_LW
 data_LW <- subset(data_LW, Type=="TL")  # Use only TL
 # data_LW <- subset(data_LW, Type=="TL" | is.na(Type))
 
 # Add shape to the LWR table and convert to factor
-data_LW <- merge(data_LW, shape_fish, by="Species")
-colnames(data_LW)[39]<- "Bshape"
+data_LW <- merge(data_LW, shape_fish, by="SpecCode") 
+colnames(data_LW)[38]<- "Bshape"
 data_LW$Bshape<-factor(data_LW$Bshape)
+data_LW
+
+# add species name and family code to LW table
+xref2 <- species_names(data_LW$SpecCode)
+xref3 <- species(xref2$Species) |> select(SpecCode, FamCode)
+xref4 <- left_join(xref2, xref3, by = "SpecCode")
+data_LW <- data_LW |> select(-FamCode) |> left_join(xref4, by = "SpecCode")
+data_LW
 
 # Extract genus names
 Genus <- data.frame(
@@ -41,8 +58,9 @@ Genus <- data.frame(
 
 data_LW$Genus<-Genus[,1]
 data_LW$Ep_specific<-Genus[,2]
+data_LW
 
-# Define species scores (CoeffDetermination) according to Froese et al. 2014
+### Define species scores (CoeffDetermination) according to Froese et al. 2014
 for (i in 1:nrow(data_LW)){
   if (is.na(data_LW$CoeffDetermination[i])==FALSE){
     data_LW$Score[i]= data_LW$CoeffDetermination[i]
@@ -52,33 +70,46 @@ for (i in 1:nrow(data_LW)){
   } else {
     data_LW$Score[i]=0.5
   }}
+data_LW
 
-# Family code - add to LWR data
-data <- species()[,c(2,11)]
-data_LW <- merge(data_LW, data, by="Species")
-data_LW$Species <- gsub(" ", "_", data_LW$Species)
-
-# Organize fish species table
+### Organize fish species table
 # List_fish <- data.frame(Species=List_fish)
-Genus <- data.frame(
-  do.call(
-    'rbind', strsplit(as.character(List_fish$Species), ' ', fixed=TRUE)
-    )
-  )
+# Genus <- data.frame(
+#   do.call(
+#     'rbind', strsplit(as.character(List_fish$Species), ' ', fixed=TRUE)
+#     )
+#   )
+# 
+# List_fish$Genus<-Genus[,1]
+# List_fish$Ep_specific<-Genus[,2]
+# 
+# List_fish <- left_join(List_fish, spp_codes, by="Species")
 
-List_fish$Genus<-Genus[,1]
-List_fish$Ep_specific<-Genus[,2]
-List_fish <- merge(List_fish, shape_fish, by="Species")
-colnames(List_fish)[4]<- "Bshape"      
-List_fish <- 
-  List_fish |> 
+List_fish <- xref |> as.data.frame()
+List_fish
+
+# add Bshapes to fish list
+List_fish <- left_join(List_fish, shape_fish, by="SpecCode")
+
+# check for dups and remove
+janitor::get_dupes(List_fish, SpecCode)
+List_fish
+List_fish <- List_fish[-33,]  # remove dup brown trout
+List_fish
+
+colnames(List_fish)[6]<- "Bshape"      
+List_fish
+
+# Add shapes to species with NAs
+List_fish <- List_fish |> 
   mutate(Bshape = case_when(
-    Ep_specific == "thompsonii" ~ "elongated", 
     Ep_specific == "bairdii" ~ "elongated", 
-    Ep_specific == "hudsonius" ~ "fusiform / normal", 
     Ep_specific == "diaphanus" ~ "fusiform / normal", 
+    Ep_specific == "thompsonii" ~ "elongated", 
+    Ep_specific == "hudsonius" ~ "fusiform / normal",
     TRUE ~ Bshape))
-# List_fish <- List_fish |> slice(-18)
+List_fish
+
 
 #-------------------------#
 # BAYESIAN ANALYSIS ----
@@ -102,16 +133,16 @@ colnames(RESULTS)<-c(
   "95% HDI of b"
   )
 
-# i = 7
-pdf(here("out", "models", "lw", "Post_param.pdf"), width=10)
+i = 1
+pdf(here("out", "models", "lw_v2", "Post_param.pdf"), width=10)
 par(mfrow=c(1,2))
 for (i in 1:nrow(List_fish)) {
   Genus = as.character(List_fish$Genus[i])  
   Species = as.character(List_fish$Ep_specific[i])
   Data = data_LW
   DataGS = Data[Data$Genus == Genus & Data$Ep_specific == Species,] # select data for Species
-  Family = species(as.character(List_fish$Species[i]))$FamCode
-  DataFam = subset(Data,FamCode.y == Family)
+  Family = as.character(List_fish$FamCode[i])
+  DataFam = subset(Data,FamCode == Family)
   Bshape = as.character(List_fish$Bshape[i]) # one of: "eel-like", "elongated", "fusiform / normal", "short & deep"
   
   # if (Bshape == "eel-like") { # eel-like prior for log(a) and b
@@ -247,7 +278,7 @@ for (i in 1:nrow(List_fish)) {
     "
     
     # Write JAGS model 
-    File <- glue::glue(here("out", "models", "lw"), "/model_", List_fish$Species[i], sep="")
+    File <- glue::glue(here("out", "models", "lw_v2"), "/model_", List_fish$Species[i], sep="")
     cat(Model, file=glue::glue(File,"_dmnorm.bug",sep=""))
     
     ### JAGS settings ----
@@ -260,8 +291,6 @@ for (i in 1:nrow(List_fish)) {
     ### Run JAGS -----
     
     # define data to be passed on in DataJags; 
-    # determine parameters to be returned in Param2Save; 
-    # call JAGS with function Jags()
     DataJags = list(ab=cbind(log10(a),b), N=Nobs, Weights=wts, Nspecies=Nspecies, GenusSpecies=GenusSpecies,
                     prior_mean_b=prior_mean_b, prior_tau_b=prior_tau_b, 
                     prior_mean_log10a=prior_mean_log10a, prior_tau_log10a=prior_tau_log10a, 
@@ -269,9 +298,19 @@ for (i in 1:nrow(List_fish)) {
                     SD_rObs_b=SD_rObs_b, SD_muObs_b=SD_muObs_b, 
                     SD_rGS_log10a=SD_rGS_log10a, SD_muGS_log10a=SD_muGS_log10a,
                     SD_rGS_b=SD_rGS_b, SD_muGS_b=SD_muGS_b)
+    # determine parameters to be returned in Param2Save; 
     Params2Save = c("abTrue","abGenusSpecies","sigmaGSlog10a","sigmaGSb","sigmaObslog10a","sigmaObsb","roObs")
-    Jags <- jags(model.file=glue::glue(File,"_dmnorm.bug",sep=""), working.directory=NULL, data=DataJags, 
-                 parameters.to.save=Params2Save, n.chains=Nchains, n.thin=Nthin, n.iter=Niter, n.burnin=Nburnin)
+    # call JAGS with function Jags()
+    Jags <- jags(
+      model.file=glue::glue(File,"_dmnorm.bug",sep=""),
+      working.directory=NULL, data=DataJags, 
+      parameters.to.save=Params2Save, 
+      n.chains=Nchains, 
+      n.thin=Nthin,
+      n.iter=Niter, 
+      n.burnin=Nburnin
+      )
+    
     Jags$BUGSoutput # contains the results from the JAGS run
     
     # Analyze output for the relatives ----
@@ -307,10 +346,14 @@ for (i in 1:nrow(List_fish)) {
     RESULTS[i,11]<- format(sd_log10a,digits=3)
     RESULTS[i,12]<- format(mean_b,digits=3)
     RESULTS[i,13]<- format(sd_b,digits=3)
-    RESULTS[i,14]<- paste(format(quantile(abGenusSpecies[,1,1],prob=0.025),digits=3),"/",
-                          format(quantile(abGenusSpecies[,1,1],prob=0.975),digits=3),sep=" ")
-    RESULTS[i,15]<-paste(format(quantile(abGenusSpecies[,1,2],prob=0.025),digits=3),"/",
-                         format(quantile(abGenusSpecies[,1,2],prob=0.975),digits=3),sep=" ")
+    RESULTS[i,14]<- paste(
+      format(quantile(abGenusSpecies[,1,1],prob=0.025),digits=3),"/",
+      format(quantile(abGenusSpecies[,1,1],prob=0.975),digits=3),sep=" "
+      )
+    RESULTS[i,15]<-paste(
+      format(quantile(abGenusSpecies[,1,2],prob=0.025),digits=3),"/",
+      format(quantile(abGenusSpecies[,1,2],prob=0.975),digits=3),sep=" "
+      )
     
     # Posterior and prior density of log10(a) ----
     x <- seq((prior_mean_log10a - 4 * prior_sd_log10a),(prior_mean_log10a + 4 * prior_sd_log10a),0.001)
@@ -356,19 +399,22 @@ for (i in 1:nrow(List_fish)) {
   } # END ALL
 dev.off()
 
+
+### Results -------------
+
+# check output table
 RESULTS
-write.table (RESULTS, file = here("out", "models", "lw", "results_L_W_Bayes_v2.txt"))
+write.table(RESULTS, file = here("out", "models", "lw_v2", "results_L_W_Bayes.txt"))
 # RESULTS <- read.table (file = here("out", "models", "lw", "results_L_W_Bayes.txt"))
 
 df_lw_params <- RESULTS |> 
   as_tibble() |> 
-  slice(-33) |>  # remove duplicate brown trout record
   select(
-    sci_name = Target.Species, 
-    log_a = mean.loga.Target.species, 
-    b = mean.b.Target.species
+    sci_name = `Target Species`, 
+    log_a = `mean loga Target species`, 
+    b = `mean b Target species`
     )
 
-write_rds(df_lw_params, here("out", "tbls", "body_mass_params.rds"))
+write_rds(df_lw_params, here("out", "tbls", "body_mass_params_v2.rds"))
 
 

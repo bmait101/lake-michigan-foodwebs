@@ -2,32 +2,51 @@
 
 
 # Read CSMI lengths data for trawled fish
-csmi_lengths <-
+raw_csmi_lengths <-
   read_xlsx(
-    here("data","CSMI lengths from trawled fishes.xlsx"), 
+    here("data-raw","CSMI lengths from trawled fishes.xlsx"), 
     sheet = "Export Worksheet"
   ) |> 
   cleans_names_and_caps()
 
 # Prepare length data for summarizing species length distributions
-csmi_lengths <- csmi_lengths |> 
+csmi_lengths <- raw_csmi_lengths |> 
   filter(is.na(added_to_raw_csmi)) |> # remove the individuals I manually inputed
-  filter(! species_name %in% c(
-    "channel catfish", "coho salmon","freshwater drum",
-    "gizzard shad", "burbot","spottail shiner","longnose sucker", 
-    "ninespine stickleback", "trout perch", "white sucker", "rainbow smelt")) |> 
+  select(-added_to_raw_csmi, -notes) |> 
+  # filter(! species_name %in% c(
+  #   "channel catfish", "coho salmon","freshwater drum",
+  #   "gizzard shad", "burbot","spottail shiner","longnose sucker", 
+  #   "ninespine stickleback", "trout perch", "white sucker", "rainbow smelt")) |> 
+  filter(species_name %in% c(
+    "alewife", 
+    "bloater",
+    "deepwater sculpin",
+    "rainbow smelt",
+    "lake whitefish",
+    "rainbow smelt",
+    "round goby",
+    "slimy sculpin",
+    "spottail shiner",
+    "yellow perch"
+    )) |>
   mutate(
     port_name = ifelse(port_name=="frankfort", "arcadia", port_name),
     date = lubridate::as_date(op_date),
     month = lubridate::month(date),
     year = lubridate::year(date)) |>
   mutate(season = case_when(
-    month %in% c(1,2,3,4,5) ~ 1, 
-    month %in% c(6,7) ~ 2, 
-    month %in% c(8,9,10,11) ~ 3,
-    TRUE ~ 4
-  )) |> 
-  mutate(season = as.character(season)) |> 
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall"
+    )) |> 
+  # mutate(season = case_when(
+  #   month %in% c(1,2,3,4,5) ~ 1, 
+  #   month %in% c(6,7) ~ 2, 
+  #   month %in% c(8,9,10,11) ~ 3,
+  #   TRUE ~ 4
+  #   )) |> 
+  # mutate(season = as.character(season)) |> 
   select(-op_date, -serial, -port) |> 
   relocate(season, .before = port_name) |> 
   # Assign specific length groups based on CSMI guidance for SIA fish
@@ -43,13 +62,39 @@ csmi_lengths <- csmi_lengths |>
 
 
 # Summarize size distributions for each species, port, season
-csmi_lengths_dists <- csmi_lengths |> 
+csmi_lengths_season_port_depth <- csmi_lengths |> 
   group_by(species_name, season, port_name, station_depth) |> 
   summarise(
     mean = mean(length, na.rm = TRUE), 
     sd = sd(length, na.rm = TRUE), 
     .groups = 'drop'
   )
+
+csmi_lengths_season_port <- csmi_lengths |> 
+  group_by(species_name, season, port_name) |> 
+  summarise(
+    mean = mean(length, na.rm = TRUE), 
+    sd = sd(length, na.rm = TRUE), 
+    .groups = 'drop'
+  )
+
+csmi_lengths_port <- csmi_lengths |> 
+  group_by(species_name, port_name) |> 
+  summarise(
+    mean = mean(length, na.rm = TRUE), 
+    sd = sd(length, na.rm = TRUE), 
+    .groups = 'drop'
+  )
+
+csmi_lengths_species <- csmi_lengths |> 
+  group_by(species_name) |> 
+  summarise(
+    mean = mean(length, na.rm = TRUE), 
+    sd = sd(length, na.rm = TRUE), 
+    .groups = 'drop'
+  )
+
+
 
 
 

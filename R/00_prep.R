@@ -20,12 +20,18 @@ pacman::p_load(
   rstanarm,  # rstanarm: Bayesian Applied Regression Modeling via Stan
   tidybayes, # tidy data + ggplot workflow for bayes
   broom,  # tidy statistical objects
-  performance, # r2_bayes function
-  conflicted
+  performance # r2_bayes function
+  # conflicted
 )
 
-conflict_prefer("filter", "dplyr")
-conflict_prefer("everything", "dplyr")
+# conflict_prefer("filter", "dplyr")
+# conflict_prefer("everything", "dplyr")
+# conflict_prefer("ar", "stats")
+# conflict_prefer("chisq.test", "stats")
+# conflict_prefer("dirichlet", "brms")
+# conflict_prefer("exponential", "brms")
+# conflict_prefer("extract", "rstan")
+# conflict_prefer("fisher.test", "stats")
 
 # Source helper fxs
 source(here("R", "helper_fxs.R"))  # helper functions for data cleaning

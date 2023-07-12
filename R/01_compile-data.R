@@ -19,155 +19,233 @@ source(here::here("R", "00_prep.R"))
 
 # Notes: 
 # - data not lipid corrected
-# - added flag column to raw data file to remove flagged data
-# - adding / simulating length data
+# - adding / simulating length data for missing body sizes
 
-# # Read raw data
-# raw_csmi_2015 <-
-#   read_xlsx(
-#     here("data-raw","raw-CSMI-2015.xlsx"),
-#     sheet = "Combined UF MED"
-#   ) |>
-#   cleans_names_and_caps()
-# 
-# # Variable selection and filter flagged data
-# df_csmi_2015 <-
-#   raw_csmi_2015 |>
-#   filter(!flag==1) |>
-#   select(
-#     sample_id,
-#     season,
-#     port = site,
-#     length_mm,
-#     depth_m,
-#     species_code = species,
-#     species_group = species_o,
-#     d15n,
-#     d13c = d13cb,
-#     cn = c_n
-#   )
-# 
-# 
-# # Clean location info and add lake regions
-# df_csmi_2015 <-
-#   df_csmi_2015 |>
-#   mutate(
-#     port = case_when(
-#       port == "0" ~ NA_character_,
-#       port == "arc" ~ "arcadia",
-#       port == "lars" ~ "st joseph",
-#       port == "lud" ~ "ludington",
-#       port == "man" ~ "manitowoc",
-#       port == "mid" ~ "midlake",
-#       port == "rac" ~ "racine",
-#       port == "sau" ~ "saugatuck",
-#       port == "stb" ~ "sturgeon bay",
-#       port == "stj" ~ "st joseph",
-#       port == "wak" ~ "waukegan")
-#     ) |>
-#   left_join(xref_ports[,3:4], by = "port")
-# 
-# # read species code definitions
-# csmi_2015_spp_xref <-
-#   read_xlsx(
-#     here("data-raw","raw-CSMI-2015.xlsx"),
-#     sheet = "Definitions",
-#     skip = 22
-#   ) |>
-#   select(species_code = 2, species = 3) |>
-#   slice_head(n=32) |>
-#   slice(-27) |>   # ZOP duplicate
-#   cleans_names_and_caps() |>
-#   mutate(
-#     species = case_when(
-#       species_code == "byt" ~ "bythotrephes",
-#       species_code == "dws" ~ "deepwater sculpin",
-#       species_code == "lwf" ~ "lake whitefish",
-#       species_code == "mus" ~ "dreissena",
-#       species_code == "zop153" ~ "zooplankton153",
-#       species_code == "zop63" ~ "zooplankton63",
-#       species_code == "zop" ~ "zooplankton",
-#       TRUE ~ species
-#     )
-#   )
-# 
-# # add species definitions to data
-# df_csmi_2015 <-
-#   df_csmi_2015 |>
-#   left_join(csmi_2015_spp_xref, by = "species_code") |>
-#   mutate(
-#     species = case_when(
-#       species_code == "pom" ~ "pom",
-#       species_code == "dip" ~ "deepwater sculpin ip",
-#       species_code == "zop" & season %in% c(1,2) ~ "zooplankton63",
-#       species_code == "zop" & season %in% c(3) ~ "zooplankton240",
-#       TRUE ~ species
-#   )) |>
-#   mutate(
-#     species_group = case_when(
-#       species_group == "alel" ~ "alewife lg",
-#       species_group == "ales" ~ "alewife sm",
-#       species_group == "blol" ~ "bloater lg",
-#       species_group == "blos" ~ "bloater sm",
-#       species_group == "ha" ~ "hemimysis adult",
-#       species_group == "hj" ~ "hemiysis juv",
-#       species_group == "musl" ~ "dreissena lg",
-#       species_group == "musm" ~ "dreissena md",
-#       species_group == "muss" ~ "dreissena sm",
-#       species_group == "smsl" ~ "slimy sculpin lg",
-#       species_group == "smss" ~ "slimy sculpin sm",
-#       species_group == "zop153" ~ "zooplankton153",
-#       species_group == "zop63" ~ "zooplankton63",
-#       species == "zooplankton240" ~ "zooplankton240",
-#       species == "zooplankton153" ~ "zooplankton153",
-#       species == "zooplankton63" ~ "zooplankton63",
-#       TRUE ~ species
-#   )) |>
-#   select(-species_code) |>
-#   relocate(species, .before = species_group)
-# 
-# 
-# # assign trophic compartments
-# df_csmi_2015 <-
-#   df_csmi_2015 |>
-#   mutate(compartment = case_when(
-#     species %in% c("pom") ~ "pom",
-#     species %in% c("algae") ~ "macro-alga",
-#     species %in% c(
-#       "zooplankton240", "zooplankton153", "zooplankton63", "bythotrephes",
-#       "hemimysis","mysis") ~ "zooplankton",
-#     species %in% c(
-#       "amphipod","chironomids","oligochaete","crayfish") ~ "benthic inverts",
-#     species %in% c("dreissena") ~ "dreissenids",
-#     species %in% c(
-#       "bloater ip","alewife ip","deepwater sculpin ip") ~ "ichthoplankton",
-#     TRUE ~ "fishes"
-#   ))
-# 
-# 
-# 
-# #### CSMI body size data -----------------------------------------------------
-# 
-# # I manually imputed lengths for individual fish I could ID between datasets
-# # That was mostly for lake trout, lake whitefish, burbot
-# # So this procedure is mostly for alewife, bloater, slimys, dwcs,
+# read raw data (n=1792)
+raw_csmi_2015 <-
+  read_xlsx(
+    here("data-raw","raw-CSMI-2015.xlsx"),
+    sheet = "Combined UF MED"
+  ) |>
+  cleans_names_and_caps()
+
+# skim it
+# skim(raw_csmi_2015)
+# missing SI for 20 samples, plus missing species in for for 8
+
+# Removed rows with missing SI data
+df_csmi_2015 <- raw_csmi_2015 |> 
+  filter(if_all(c(d15n, d13cb), ~ !is.na(.))) 
+
+# Check for rows to remove in notes
+# df_csmi_2015 |> 
+#   filter(!is.na(op_notes)) |> 
+#   select(species, op_notes) |> 
+#   print(n=Inf)
+
+# remove rows with potentially bad data (n=6) (but keep NAs)
+df_csmi_2015 <- df_csmi_2015 |> 
+  filter(
+    is.na(op_notes) | 
+      str_detect(op_notes, "insuf|n below detection", negate = TRUE))
+
+# skim again
+# skim(df_csmi_2015)
+# still missing taxon for 1 obs.
+
+# remove rows missing taxon (n=1)
+df_csmi_2015 <- filter(df_csmi_2015, !is.na(species))
+
+# duplicates
+df_csmi_2015 |> get_dupes(sample_id)  # do not appear to be true duplicates, ID must be bulked samples
+
+# Standardize and select fields
+df_csmi_2015 <- df_csmi_2015 |>
+  select(
+    sample_id,
+    season,
+    port = site,
+    length_mm,
+    depth_m,
+    species_code = species,
+    species_group = species_o,
+    d15n,
+    d13c = d13cb,
+    cn = c_n
+  )
+
+# check it
+# skim(df_csmi_2015)
+
+# why 5 seasons?
+# count(df_csmi_2015, season)  # 4 rows with no season data
+df_csmi_2015 <- df_csmi_2015 |> filter(!season %in% c(0,"nr"))
+# convert season 1 to 2, and 2 to 3 (fiscal quarters)
+df_csmi_2015 <- df_csmi_2015 |> 
+  mutate(season = case_when(
+    season == 1 ~ "spring",
+    season == 2 ~ "summer",
+    season == 3 ~ "fall"
+  ))
+
+
+# Check spatial data (ports)
+# count(df_csmi_2015, port)  # 7 rows with no spatial reference
+df_csmi_2015 <- df_csmi_2015 |> 
+  filter(!port %in% c("0","z.unk","midlake"))
+
+# clean location info and add lake regions for xref table
+df_csmi_2015 <- df_csmi_2015 |>
+  mutate(
+    port = case_when(
+      port == "arc" ~ "arcadia",
+      port == "lars" ~ "st joseph", # St. Joes Deep station
+      port == "lud" ~ "ludington",
+      port == "man" ~ "manitowoc",
+      # port == "mid" ~ "midlake",
+      port == "rac" ~ "racine",
+      port == "sau" ~ "saugatuck",
+      port == "stb" ~ "sturgeon bay",
+      port == "stj" ~ "st joseph",
+      port == "wak" ~ "waukegan")
+    ) |>
+  left_join(xref_ports[,3:4], by = "port")
+
+# check it
+# skim(df_csmi_2015)
+
+# read in species code definitions and clean up
+csmi_2015_spp_xref <-
+  read_xlsx(
+    here("data-raw","raw-CSMI-2015.xlsx"),
+    sheet = "Definitions",
+    skip = 22
+  ) |>
+  select(species_code = 2, species = 3) |>
+  slice_head(n=32) |>
+  slice(-27) |>   # ZOP duplicate
+  cleans_names_and_caps() |>
+  mutate(
+    species = case_when(
+      species == "algae" ~ "benthic algae",
+      species_code == "byt" ~ "bythotrephes",
+      species_code == "dws" ~ "deepwater sculpin",
+      species_code == "lwf" ~ "lake whitefish",
+      species_code == "mus" ~ "dreissena",
+      species_code == "zop153" ~ "zooplankton153",
+      species_code == "zop63" ~ "zooplankton63",
+      species_code == "zop" ~ "zooplankton",
+      TRUE ~ species
+    )
+  )
+
+# add species definitions to data
+df_csmi_2015 <- left_join(df_csmi_2015, csmi_2015_spp_xref, by = "species_code") 
+
+# check species assignments
+# df_csmi_2015 |> count(species) |> print(n=Inf)
+# missing species labels for 157 samples
+# check them
+# df_csmi_2015 |> filter(is.na(species)) |> count(species_code)
+
+# add species labels for those missing it
+df_csmi_2015 <- df_csmi_2015 |> 
+  mutate(
+    species = case_when(
+      species_code == "dip" ~ "deepwater sculpin ip", 
+      species_code == "pom" ~ "pom", 
+      TRUE ~ species
+    )
+  )
+
+# check fix
+# df_csmi_2015 |> count(species) |> print(n=Inf)
+# df_csmi_2015 |> count(species_code) |> print(n=Inf)
+
+# sping and summer zops are 63 and fall is 240 mesh
+df_csmi_2015 <- df_csmi_2015 |>
+  mutate(
+    species = case_when(
+      species_code == "zop" & season %in% c("spring","summer") ~ "zooplankton63",
+      species_code == "zop" & season %in% c("fall") ~ "zooplankton240",
+      TRUE ~ species
+  ))
+
+# assaign and rename species groups based on species codes
+df_csmi_2015 <- df_csmi_2015 |>
+  mutate(
+    species_group = case_when(
+      species_group == "alel" ~ "alewife lg",
+      species_group == "ales" ~ "alewife sm",
+      species_group == "blol" ~ "bloater lg",
+      species_group == "blos" ~ "bloater sm",
+      species_group == "ha" ~ "hemimysis adult",
+      species_group == "hj" ~ "hemiysis juv",
+      species_group == "musl" ~ "dreissena lg",
+      species_group == "musm" ~ "dreissena md",
+      species_group == "muss" ~ "dreissena sm",
+      species_group == "smsl" ~ "slimy sculpin lg",
+      species_group == "smss" ~ "slimy sculpin sm",
+      species == "zooplankton240" ~ "zooplankton240",
+      species == "zooplankton153" ~ "zooplankton153",
+      species == "zooplankton63" ~ "zooplankton63",
+      TRUE ~ species
+  )) |>
+  select(-species_code) |>
+  relocate(species, .before = species_group)
+
+# check taxonomony again
+# df_csmi_2015 |> count(species, species_group) |> print(n=Inf)
+
+
+# assign trophic compartments
+df_csmi_2015 <- df_csmi_2015 |>
+  mutate(
+    compartment = case_when(
+      species %in% c("pom") ~ "pom",
+      species %in% c("benthic algae") ~ "benthic algae",
+      species %in% c(
+        "zooplankton240", "zooplankton153", "zooplankton63", "bythotrephes",
+        "hemimysis", "mysis") ~ "zooplankton",
+      species %in% c(
+        "amphipod","chironomids","oligochaete","crayfish") ~ "benthic inverts",
+      species %in% c("dreissena") ~ "dreissenids",
+      species %in% c(
+        "bloater ip","alewife ip","deepwater sculpin ip") ~ "ichthoplankton",
+      TRUE ~ "fishes"
+  ))
+
+
+# adding depth - assumed from data and sample ids
+df_csmi_2015 <- df_csmi_2015 |> 
+  mutate(depth_m = if_else(sample_id == "cmu-4-ale-3-14", 5, depth_m)) |> 
+  mutate(depth_m = if_else(sample_id == "63-562", 18, depth_m)) 
+
+# df_csmi_2015 |> count(species) |> print(n=Inf)
+# df_csmi_2015 |> count(compartment) |> print(n=Inf)
+
+
+#### CSMI body size data -----------------------------------------------------
+
+# I manually imputed lengths for individual fish I could ID between datasets
+# That was mostly for lake trout, lake whitefish, burbot
+# So this procedure is mostly for alewife, bloater, slimys, dwcs,
+
+# df_csmi_2015 |> filter(compartment=="fishes") |> count()
+# df_csmi_2015 |> filter(compartment=="fishes", is.na(length_mm)) |> count()
 # 
 # # Load length data
 # source(here("R", "load_csmi_legnths.R"))
 # 
-# # Join distribution summary stats to csmi data
-# df_csmi_2015 <- df_csmi_2015 |>
+# #### Est by species, port, season, and depth 
+# df_csmi_2015_lengthed <- df_csmi_2015 |> 
 #   left_join(
-#     csmi_lengths_dists, by = c(
+#     csmi_lengths_season_port_depth, by = c(
 #       "species_group"="species_name",
 #       "season",
 #       "port"="port_name",
 #       "depth_m"="station_depth")
-#   )
-# 
-# # Simulate lengths - using distribution stats
-# df_csmi_2015_lengthed <-
-#   df_csmi_2015 |>
+#   ) |>
 #   mutate(seed = 1:nrow(df_csmi_2015)+10) %>%
 #   mutate(
 #     length_mm = case_when(
@@ -179,23 +257,104 @@ source(here::here("R", "00_prep.R"))
 #       TRUE ~ length_mm
 #       )
 #     ) |>
-#   select(-mean, -sd, -seed)
+#   #fix two negatives
+#   mutate(length_mm = ifelse(length_mm<0, length_mm*-1, length_mm)) |> 
+#   select(-mean, -sd, -seed) |>
+#   mutate_all(~ifelse(is.nan(.), NA, .))  # fix NaN
 # 
-# # Fix NaN
-# df_csmi_2015_lengthed <-
-#   df_csmi_2015_lengthed |>
-#   mutate_all(~ifelse(is.nan(.), NA, .))
+# df_csmi_2015_lengthed |> filter(compartment=="fishes", is.na(length_mm)) |> count() # 247
+# # df_csmi_2015_lengthed |> relocate(c(length_mm, mean, sd), .after = length_mm) |>
+# #   filter(compartment=="fishes") |> View()
 # 
-# # From 15% to ~70% now have lengths
-# saveRDS(df_csmi_2015_lengthed, here("out","data","df_csmi_2015_lengthed.rds"))
+# #### Est by species, port, season 
+# df_csmi_2015_lengthed_2 <- df_csmi_2015_lengthed |> 
+#   left_join(
+#     csmi_lengths_season_port, by = c(
+#       "species_group"="species_name",
+#       "season",
+#       "port"="port_name")
+#   ) |>
+#   mutate(seed = 1:nrow(df_csmi_2015_lengthed)+10) %>%
+#   mutate(
+#     length_mm = case_when(
+#       compartment=="fishes" & is.na(length_mm) ~
+#         pmap_dbl(list(mean, sd, seed), function(x, y, z){
+#           set.seed(z); rnorm(1, x, y)
+#         }
+#         ),
+#       TRUE ~ length_mm
+#     )
+#   ) |>
+#   select(-mean, -sd, -seed) |>
+#   mutate_all(~ifelse(is.nan(.), NA, .))  # fix NaN
+# 
+# df_csmi_2015_lengthed_2 |> filter(compartment=="fishes", is.na(length_mm))|> count() # 208
+# # df_csmi_2015_lengthed_2 |> relocate(c(length_mm, mean, sd), .after = length_mm) |>
+# #   filter(compartment=="fishes") |> View()
+# 
+# #### Est by species, port 
+# df_csmi_2015_lengthed_3 <- df_csmi_2015_lengthed_2 |> 
+#   left_join(
+#     csmi_lengths_port, by = c(
+#       "species_group"="species_name",
+#       "port"="port_name")
+#   ) |> 
+#   mutate(seed = 1:nrow(df_csmi_2015_lengthed_2)+10) %>%
+#   mutate(
+#     length_mm = case_when(
+#       compartment=="fishes" & is.na(length_mm) ~
+#         pmap_dbl(list(mean, sd, seed), function(x, y, z){
+#           set.seed(z); rnorm(1, x, y)
+#         }
+#         ),
+#       TRUE ~ length_mm
+#     )
+#   ) |>
+#   select(-mean, -sd, -seed) |>
+#   mutate_all(~ifelse(is.nan(.), NA, .))  # fix NaN
+# 
+# df_csmi_2015_lengthed_3 |> filter(compartment=="fishes", is.na(length_mm))|> count() # 198
+# # df_csmi_2015_lengthed_3 |> relocate(c(length_mm, mean, sd), .after = length_mm) |>
+# #   filter(compartment=="fishes") |> View()
+# 
+# 
+# #### Est by species, port 
+# df_csmi_2015_lengthed_4 <- df_csmi_2015_lengthed_3 |> 
+#   left_join(
+#     csmi_lengths_species, by = c(
+#       "species_group"="species_name")
+#   ) |> 
+#   mutate(seed = 1:nrow(df_csmi_2015_lengthed_3)+10) %>%
+#   mutate(
+#     length_mm = case_when(
+#       compartment=="fishes" & is.na(length_mm) ~
+#         pmap_dbl(list(mean, sd, seed), function(x, y, z){
+#           set.seed(z); rnorm(1, x, y)
+#         }
+#         ),
+#       TRUE ~ length_mm
+#     )
+#   ) |>
+#   select(-mean, -sd, -seed) |>
+#   mutate_all(~ifelse(is.nan(.), NA, .))  # fix NaN
+# 
+# df_csmi_2015_lengthed_4 |> filter(compartment=="fishes", is.na(length_mm))|> count() # 81
+# # df_csmi_2015_lengthed_4 |> 
+# #   # relocate(c(length_mm, mean, sd), .after = length_mm) |>
+# #   filter(compartment=="fishes") |> View()
+# 
+# 
+# # From 85% to ~10% no lengths
+# saveRDS(df_csmi_2015_lengthed_4, here("out","data","df_csmi_2015_lengthed_v2.rds"))
 
 # Load csmi data that has length data attributed to fishes
-df_csmi_2015_lengthed <- readRDS(here("out","data","df_csmi_2015_lengthed.rds"))
+df_csmi_2015_lengthed_4 <- readRDS(here("out","data","df_csmi_2015_lengthed_v2.rds"))
 
-### Standardize data
 
-df_csmi_2015_clean <-
-  df_csmi_2015_lengthed |>
+
+#### Finalize data ------------------
+
+df_csmi_2015_clean <- df_csmi_2015_lengthed_4 |>
   mutate(
     dataset = "csmi_2015",
     mass_g = NA,
@@ -218,7 +377,7 @@ raw_uwm_2002_fish <-
 
 # Variable selection and flags
 df_uwm_2002_fish <- raw_uwm_2002_fish |> 
-  filter(!flag==1) |> 
+  filter(!flag==1) |>  # removes 15 rows with missing or bad data
   select(
     sample_id,
     date, 
@@ -233,6 +392,7 @@ df_uwm_2002_fish <- raw_uwm_2002_fish |>
   ) |> 
   mutate(cn = ug_c / ug_n) |> 
   select(-ug_c, -ug_n) 
+
 
 # Location info
 df_uwm_2002_fish <- df_uwm_2002_fish |> 
@@ -257,17 +417,25 @@ df_uwm_2002_fish <- df_uwm_2002_fish |>
     species == "zooplankton" ~ "zooplankton", 
     TRUE ~ "fishes"))
 
+# seasons
+df_uwm_2002_fish <- df_uwm_2002_fish |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
 
 # Standardize columns
 df_uwm_2002_fish <- df_uwm_2002_fish |> 
   mutate(
     dataset = "uwm_2002_2003",
     mass_g = NA, 
-    num_ind = NA,
-    date = lubridate::as_date(date),
-    year = lubridate::year(date), 
-    season = as.character(lubridate::quarter(
-      date, with_year = FALSE, fiscal_start = 1))
+    num_ind = NA
     ) |>
   relocate_columns()
 
@@ -331,6 +499,21 @@ df_uwm_2010_fish <- df_uwm_2010_fish |>
       TRUE ~ species
       ))
   
+# seasons
+df_uwm_2010_fish <- df_uwm_2010_fish |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(year = ifelse(is.na(date), 2010, year)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
+
 # Standardize columns
 df_uwm_2010_fish <- df_uwm_2010_fish |> 
   mutate(
@@ -340,9 +523,6 @@ df_uwm_2010_fish <- df_uwm_2010_fish |>
     num_ind = NA,
     length_mm = ifelse(length_mm == 99999, NA, length_mm),
     mass_g = NA, 
-    date = lubridate::as_date(date),
-    year = lubridate::year(date), 
-    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
     # convert the text depth labels to numeric
     depth_m = case_when(
       depth_m == "shallow" ~ 3, 
@@ -351,7 +531,6 @@ df_uwm_2010_fish <- df_uwm_2010_fish |>
       depth_m == "various" ~ as.double(NA)
     )
     ) |>
-  mutate(year = ifelse(is.na(date), 2010, year)) |> 
   relocate_columns()
 
 # skim(df_uwm_2010_fish)
@@ -375,7 +554,7 @@ raw_uwm_2010_benthic <- read_xlsx(
 
 # Variable selection and flags
 df_uwm_2010_benthic <- raw_uwm_2010_benthic |> 
-  filter(!flag==1) |> 
+  filter(!flag==1) |>  # removed 20
   select(
     sample_id = sample_number, 
     date = date_collected,
@@ -392,7 +571,7 @@ df_uwm_2010_benthic <- raw_uwm_2010_benthic |>
   select(-ug_c, -ug_n)
 
 
-# Deal with cluster f*ck of site/port names and standardize
+# Deal with site/port names and standardize
 df_uwm_2010_benthic <- df_uwm_2010_benthic |> 
   separate(site, into = c("port"), extra = "drop") |>
   mutate(port = case_when(
@@ -441,17 +620,15 @@ df_uwm_2010_benthic <- df_uwm_2010_benthic |>
 
 
 # Species 
-# df_uwm_2010_benthic |> count(species)
-
 df_uwm_2010_benthic <- df_uwm_2010_benthic |> 
   mutate(species = case_when(
-    str_detect(species, "algae") ~ "algae", 
+    str_detect(species, "algae") ~ "benthic algae", 
     str_detect(species, "amphipod") ~ "amphipod", 
     str_detect(species, "chironomid") ~ "chironomids", 
     str_detect(species, "crayfish") ~ "crayfish", 
-    str_detect(species, "cladophora") ~ "algae", 
+    str_detect(species, "cladophora") ~ "benthic algae", 
     str_detect(species, "dipteran") ~ "chironomids", 
-    str_detect(species, "hydracarina") ~ "hydracarina", 
+    str_detect(species, "hydracarina") ~ "hydrachnidiae", 
     str_detect(species, "isopod") ~ "isopod", 
     str_detect(species, "leech") ~ "leech", 
     str_detect(species, "oligochaete") ~ "oligochaete", 
@@ -462,21 +639,31 @@ df_uwm_2010_benthic <- df_uwm_2010_benthic |>
     species_group = species, 
     compartment = case_when(
       species %in% c("zooplankton63") ~ "zooplankton", 
-      species %in% c("algae") ~ "macro-alga", 
+      species %in% c("benthic algae") ~ "benthic algae", 
       species %in% c("dreissena") ~ "dreissenids", 
       is.na(species) ~ NA_character_, 
       TRUE ~ "benthic inverts"
   ))
 
 
+# seasons
+df_uwm_2010_benthic <- df_uwm_2010_benthic |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
 # Standardize 
 df_uwm_2010_benthic <- df_uwm_2010_benthic |> 
   mutate(
     dataset = "uwm_2010_2011",
-    date = lubridate::as_date(date),
     length_mm = NA_integer_, 
-    year = lubridate::year(date), 
-    season = as.character(lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)), 
     depth_m = as.numeric(ifelse(depth_m == "integrated", "8", depth_m)),
     mass_g = as.numeric(mass_g),
     num_ind = as.numeric(ifelse(num_ind == "n/a", NA_character_, num_ind))) |>
@@ -528,8 +715,7 @@ raw_kornis_2014 <-
 
 
 # Variable selection
-df_kornis_2014 <-
-  raw_kornis_2014 |> 
+df_kornis_2014 <-raw_kornis_2014 |> 
   select(
     sample_id = specimen_id,
     date = sample_date, 
@@ -544,9 +730,12 @@ df_kornis_2014 <-
     cn = c_n_ratio
   ) 
 
+# remove duplicates
+df_kornis_2014 |> janitor::get_dupes(sample_id)
+df_kornis_2014 <- df_kornis_2014 |> distinct(sample_id, .keep_all = TRUE)
+
 # Fix regions / port names
-df_kornis_2014 <- 
-  df_kornis_2014 |> 
+df_kornis_2014 <- df_kornis_2014 |> 
   mutate(
     lake_region = case_when(
       lake_region =="northeast" ~ "ne", 
@@ -562,8 +751,7 @@ df_kornis_2014 <-
   )
 
 # Fix species names 
-df_kornis_2014 <- 
-  df_kornis_2014 |> 
+df_kornis_2014 <- df_kornis_2014 |> 
   mutate(
     species = case_when(
       species == "large alewife" ~ "alewife", 
@@ -583,21 +771,30 @@ df_kornis_2014 <-
 df_kornis_2014 <- df_kornis_2014 |> 
   mutate(
     compartment = case_when(
-      species == "dreissenia" ~ "dreissenids", 
+      species == "dreissena" ~ "dreissenids", 
       species == "mysis" ~ "zooplankton", 
       TRUE ~ "fishes"
       )
   ) 
+
+# seasons
+df_kornis_2014 <- df_kornis_2014 |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
 
 # Standardize
 df_kornis_2014 <- df_kornis_2014 |> 
     mutate(
       dataset = "kornis_2014",
       sample_id = as.character(sample_id),
-      date = lubridate::as_date(date),
-      year = lubridate::year(date), 
-      season = as.character(lubridate::quarter(
-        date, with_year = FALSE, fiscal_start = 1)), 
       depth_m = NA,
       species_group = species, 
       num_ind = NA,
@@ -640,6 +837,9 @@ df_nps_2015_salmonids <-
     cn
   ) 
 
+df_nps_2015_salmonids |> janitor::get_dupes(sample_id)
+df_nps_2015_salmonids <- df_nps_2015_salmonids |> distinct(sample_id, .keep_all = TRUE)
+
 # Link xref tables
 df_nps_2015_salmonids <- df_nps_2015_salmonids |> 
   # rename ports to match the xref table
@@ -667,15 +867,25 @@ df_nps_2015_salmonids <- df_nps_2015_salmonids |>
     species == "lat" ~ "lake trout", 
   )) 
 
+
+# seasons
+df_nps_2015_salmonids <- df_nps_2015_salmonids |> 
+  mutate(
+    date = lubridate::mdy(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
 # Standardize
 df_nps_2015_salmonids <- df_nps_2015_salmonids |> 
   mutate(
     dataset = "nps_2015",
     sample_id = as.character(sample_id),
-    date = lubridate::mdy(date),
-    year = lubridate::year(date), 
-    season = as.character(lubridate::quarter(
-      date, with_year = FALSE, fiscal_start = 1)), 
     depth_m = NA,
     compartment = "fishes", 
     species_group = species, 
@@ -715,6 +925,10 @@ df_glft_2016_fish <- raw_glft_2016_fish |>
   mutate(cn = ug_c / ug_n) |>
   select(-ug_c, -ug_n) 
 
+# dups
+df_glft_2016_fish |> get_dupes(sample_id)
+
+
 # Link to xrefs
 df_glft_2016_fish <- df_glft_2016_fish |> 
   # rename ports to match the xref table
@@ -732,16 +946,27 @@ df_glft_2016_fish <- df_glft_2016_fish |>
     ) |> 
   left_join(xref_ports[,3:4], by = "port") 
 
+
+# seasons
+df_glft_2016_fish <- df_glft_2016_fish |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
+
 # Standardize
 df_glft_2016_fish <- df_glft_2016_fish |> 
   mutate(
     dataset = "glft_2016",
     mass_g = NA, 
     num_ind = NA,
-    date = lubridate::as_date(date),
-    year = lubridate::year(date), 
-    season = as.character(lubridate::quarter(
-      date, with_year = FALSE, fiscal_start = 1)), 
     compartment = "fishes", 
     species = ifelse(
       species == "nine-spine stickleback", "ninespine stickleback", species), 
@@ -783,6 +1008,10 @@ df_roth_2019_fish <- raw_roth_2019_fish |>
     mass_g = t_wg
     )
 
+# dups 
+df_roth_2019_fish |> get_dupes(sample_id) 
+df_roth_2019_fish <- df_roth_2019_fish |> distinct(sample_id, .keep_all = TRUE)
+
 # Link to xrefs
 df_roth_2019_fish <- df_roth_2019_fish |> 
   mutate(
@@ -819,14 +1048,27 @@ df_roth_2019_fish <- df_roth_2019_fish |>
     species == "yep" ~ "yellow perch",
   ))
 
+
+# seasons
+df_roth_2019_fish <- df_roth_2019_fish |> 
+  mutate(
+    date = lubridate::as_date(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(year = case_when(is.na(year) ~ 2019, TRUE ~ 2019)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
+
 # Standardize 
 df_roth_2019_fish <- df_roth_2019_fish |> 
   select(-site_code) |>
   mutate(
     dataset = "roth_2019",
-    year = lubridate::year(date),
-    season = as.character(
-      lubridate::quarter(date, with_year = FALSE, fiscal_start = 1)),
     # port = NA,
     compartment = case_when(
       species %in% c("oligo-chiro", "dreissena") ~ "benthic inverts", 
@@ -834,15 +1076,100 @@ df_roth_2019_fish <- df_roth_2019_fish |>
       TRUE ~ "fishes"),
     num_ind = NA,
     species_group = species, 
-    year = case_when(is.na(year) ~ 2019, TRUE ~ 2019)
     ) |> 
   relocate_columns()
 
 
 # Remove Lake Huron data
-df_roth_2019_fish <- df_roth_2019_fish |> 
-  filter(lake_region != "Huron") 
+df_roth_2019_fish <- df_roth_2019_fish |> filter(lake_region != "Huron") 
 
+
+### Oreilly 2014-2015 --------------------------------------------
+
+# Read data
+raw_oreilly_2014_15 <- read_csv(
+  here("data-raw", "raw_O'Reilly_et_al_Nearshore_LakeMichigan_Isotope_Data.csv")
+) |> 
+  cleans_names_and_caps() 
+
+
+# Variable selection
+df_oreilly <- raw_oreilly_2014_15 |>
+  select(
+    sample_id, 
+    date = collection_date_m_d_yr, 
+    year,
+    port = site, 
+    species = taxa_species,
+    length_mm = total_length_mm,
+    d15n,  
+    d13c, 
+    cn = c_n
+    )
+
+df_oreilly |> get_dupes(sample_id)
+df_oreilly <- df_oreilly |> distinct(sample_id, .keep_all = TRUE)
+
+# Link to xrefs for lake regions
+df_oreilly <- df_oreilly |> 
+  left_join(xref_ports |> select(port, lake_region), by = "port") 
+
+
+# taxa
+df_oreilly <- df_oreilly |> 
+  mutate(species = case_when(
+    species == "amphipoda" ~ "amphipod",
+    species == "chironomidae" ~ "chironomids",
+    species == "dreissenidae" ~ "dreissena",
+    species == "seston" ~ "pom",
+    species == "steelhead" ~ "rainbow trout",
+    species == "redhorse (moxostoma spp.)" ~ "shorthead redhorse", 
+    TRUE ~ species
+  )) 
+
+
+# seasons
+df_oreilly <- df_oreilly |> 
+  mutate(
+    date = lubridate::mdy(date),
+    year = lubridate::year(date),
+    month = lubridate::month(date)) |> 
+  mutate(season = case_when(
+    month %in% c(12,1,2) ~ "winter", 
+    month %in% c(3,4,5) ~ "spring", 
+    month %in% c(6,7,8) ~ "summer", 
+    month %in% c(9,10,11) ~ "fall")) |> 
+  select(-month)
+
+
+
+
+# Standardize 
+df_oreilly <- df_oreilly |> 
+  mutate(
+    dataset = "oreilly_2014_15",
+    depth_m = NA,
+    mass_g = NA,
+    compartment = case_when(
+      species %in% c("amphipod","chironomids","hydrachnidiae",
+                     "gastropoda","sphaeriidae","trichoptera") ~ "benthic inverts", 
+      species %in% c("dreissena") ~ "dreissenids",
+      species %in% c("pom") ~ "pom",
+      TRUE ~ "fishes"
+      ),
+    num_ind = NA,
+    species_group = case_when(
+      species == "pom" ~ paste(species, length_mm, sep = "_"), 
+      TRUE ~ species
+    ), 
+    length_mm = case_when(
+      length_mm %in% c("50 um","160 um","250 um") ~ NA, 
+      length_mm == "nan" ~ NA,
+      TRUE ~ length_mm
+    ), 
+  ) |>
+  mutate(length_mm = as.numeric(length_mm)) |> 
+  relocate_columns()
 
 
 
@@ -853,26 +1180,38 @@ data <- bind_rows(
   df_uwm_2010_fish, 
   df_uwm_2010_benthic, 
   df_kornis_2014,
+  df_oreilly,
   df_csmi_2015_clean,
   df_nps_2015_salmonids,
   df_glft_2016_fish,
   df_roth_2019_fish,
 ) 
 
+# rm(df_uwm_2002_fish); rm(df_uwm_2010_fish); rm(df_uwm_2010_benthic)
+# rm(df_kornis_2014); rm(df_csmi_2015_clean); rm(df_nps_2015_salmonids); rm(df_oreilly)
+# rm(df_glft_2016_fish); rm(df_roth_2019_fish); rm(df_csmi_2015_lengthed)
+# rm(list=ls(pattern="^raw")); rm(df_csmi_2015)
+# rm(csmi_2015_spp_xref); rm(csmi_lengths); rm(csmi_lengths_dists)
+
 
 ## Clean taxonomy ===========================================================
+
+# check taxonomy
+data |> count(compartment)
+data |> count(compartment, species) |> print(n=Inf)
 
 data <- data |> 
   mutate(
     species = case_when(
-      species == "algae" ~ "cladophora",
+      species == "algae" ~ "benthic algae",
       species == "bloater ip" ~ "bloater",
       species == "alewife ip" ~ "alewife",
-      species == "deepwater sculpin ip" ~ "deepwater sculpin", 
+      species == "deepwater sculpin ip" ~ "deepwater sculpin",
+      species == "offshore round goby" ~ "round goby", 
       TRUE ~ species
       ), 
     species_group = case_when(
-      compartment == "macro-alga" ~"cladophora", 
+      species_group == "algae" ~ "benthic algae", 
       species == "dreissena" ~ "dreissena", 
       species_group == "alewife" & length_mm < 100 ~ "alewife sm", 
       species_group == "alewife" & length_mm >= 100 ~ "alewife lg", 
@@ -892,8 +1231,53 @@ data <- data |>
 
 # add scientific names
 data <- data |> 
-  left_join(xref_sci_names, by = c("species"="common_name")) |> 
+  left_join(xref_sci_names |> select(-compartment), by = c("species"="common_name")) |> 
   relocate(sci_name, .before = species)
+
+
+# check taxonomy
+# data |> count(compartment)
+# data |> count(compartment, species) |> print(n=Inf)
+# data |> count(compartment, sci_name) |> print(n=Inf)
+# data |> count(species_group) |> print(n=Inf)
+
+rm(list=ls(pattern="^xref"))
+
+
+# Assign factors =========================================================
+
+data <- data |> 
+  select(-num_ind) |>
+  mutate(
+    depth_g = case_when(
+      dataset == "oreilly_2014_15" ~ "ns",
+      depth_m <= 30 ~ "ns", 
+      depth_m > 30 & depth_m <= 100 ~ "of-d", 
+      depth_m > 100 ~ "of-p", 
+      TRUE ~ "unkn"
+    )
+  ) |>
+  relocate(depth_g, .after = depth_m) |> 
+  mutate(
+    dataset = factor(
+      dataset, 
+      levels = c(
+        "uwm_2002_2003","uwm_2010_2011","kornis_2014", "oreilly_2014_15",
+        "csmi_2015","nps_2015","glft_2016","roth_2019"
+      )), 
+    compartment = factor(
+      compartment, levels = c(
+        "pom", "benthic algae","benthic inverts",
+        "dreissenids","ichthoplankton","zooplankton","fishes"
+      )), 
+    lake_region = factor(
+      lake_region, 
+      levels = c("nw", "ne", "sw", "se")), 
+    season = factor(season, levels = c("winter","spring","summer","fall")), 
+    depth_g = factor(depth_g, 
+                     levels = c("ns","os-d","os-p","unkn"))
+  ) |> 
+  mutate(across(where(is.character), as.factor)) 
 
 
 
@@ -903,27 +1287,39 @@ data <- data |>
   mutate(
     d13c_norm = case_when(
       # non-zoop inverts = Logan et al. (2008)
-      compartment == "benthic inverts" ~ 
+      # compartment == "benthic inverts" ~ 
+      #   0.967 * d13c + 0.861,
+      # non-zoop inverts = Logan et al. (2008)
+      compartment %in% c("benthic inverts","dreissenids") & cn > 3.25 ~ 
         0.967 * d13c + 0.861,
       # zoops = Smyntek et al. (2007)
       compartment == "zooplankton" ~ 
         d13c + (6.3 * ((cn - 4.2)/(cn))),
       # fishes = Hoffman et al. (2015)
-      compartment %in% c("fishes", "ichthoplankton") & cn > 4 ~
+      compartment %in% c("fishes", "ichthoplankton") & cn > 3.25 ~
         d13c + (-6.5 * (3.5 - cn)) / cn,
       TRUE ~ d13c
     )
-  )
-
+  ) |> 
+  relocate(d13c_norm, .after = d13c)
 
 ## Save compiled data ==========================================================
 
-save(data, file = here("out", "data", "compiled_data.RData"))
-# load(here("out", "data", "compiled_data.RData"))
+skim(data)
+#lake region
+#port
+#depth
 
+save(data, file = here("out", "data", "compiled_data_v4.RData"))
+#v4 = duplicate samples removed
+
+# load(here("out", "data", "compiled_data_v2.RData"))
 
 
 ## Summary ====================================================================
+
+data |> filter(compartment=="fishes") |> distinct(species, sci_name) |>
+  write_csv(here("data-raw", "spp_xref_v2.csv"))
 
 # vis_dat(data)
 # vis_miss(data)
