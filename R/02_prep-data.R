@@ -14,12 +14,9 @@ load(here("out", "data", "compiled_data_v3.RData"))
 
 ### Initial prep  =============================================================
 
-# 2014-16 data only and remove ip
+# 2015 only and no green bay
 df <- data |> 
-  filter(year == 2015) |>
-  # filter(year %in% c(2014,2015,2016)) |> 
-  # remove katies pom data
-  # filter(!(dataset == "oreilly_2014_15" & species == "pom")) |> 
+  filter(dataset %in% c("csmi_2015", "nps_2015")) |> 
   filter(!compartment %in% c("ichthoplankton")) 
 
 # add a basin category
@@ -30,14 +27,6 @@ df <- df |>
       lake_region %in% c("sw", "se") ~ "south")) |> 
   relocate(basin, .before = lake_region)
 
-# group different zoop nets together
-# df <- df |> 
-#   mutate(species = case_when(
-#     species == "zooplankton63" ~ "zooplankton", 
-#     species == "zooplankton153" ~ "zooplankton", 
-#     species == "zooplankton240" ~ "zooplankton", 
-#     TRUE ~ species
-#   ))
 
 # assign baselines and consumer 
 df <- df |> 
@@ -88,12 +77,17 @@ df <- filter(df, ! d13c_norm > -12)
 
 ### Fishes ----------------------------------------
 
+# Check missing data size measurements
+# df |>
+#   vis_miss()
+# 57.2% have measurements
+
 # Check missing data for fishes
-df |>
-  filter(compartment %in% c("fishes")) |>
-  vis_miss()
-# 7% missing lengths
-# 50% missing mass
+# df |>
+#   filter(compartment %in% c("fishes")) |>
+#   vis_miss()
+# 6% missing lengths
+# 62% missing mass
 
 
 # load/join log a and b parameters from L-W regressions (Bayes_LWR_Model.R)
@@ -119,8 +113,8 @@ df <-
 # df |>
 #   filter(compartment %in% c("fishes")) |>
 #   vis_miss()
-# 7% missing lengths
-# 7% missing mass
+# 6% missing lengths
+# 6% missing mass
 
 rm(df_lw_params)
 rm(df_lw_params_v2)
@@ -165,25 +159,25 @@ df <- df |>
 
 
 # Check missing body size for all consumers now:
-df |>
-  filter(! compartment %in% c("pom", "benthic algae")) |>
-  filter(is.na(mass_g)) |>
-  count(compartment) |>
-  print(n=100)
-
+# df |>
+#   filter(! compartment %in% c("pom", "benthic algae")) |>
+#   filter(is.na(mass_g)) |>
+#   count(compartment) |>
+#   print(n=100)
+# 82 fishes missing mass data
 
 # which species are missing body size?
-df |>
-  filter(compartment %in% c("fishes")) |>
-  filter(is.na(mass_g)) |>
-  count(species_group) |>
-  print(n=100)
+# df |>
+#   filter(compartment %in% c("fishes")) |>
+#   filter(is.na(mass_g)) |>
+#   count(species_group) |>
+#   print(n=100)
 
 
 ### Check -------
 
 # Check missing again for consumers
-vis_miss(df)
-# 46% missing mass to 20% 
+# vis_miss(df)
+# 46% missing mass to 11% 
 
 
