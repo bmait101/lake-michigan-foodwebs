@@ -14,7 +14,6 @@ pacman::p_load(
   parallel,  # support for parallel computing
   tRophicPosition,  # Bayesian Trophic Position Estimation with Stable Isotopes 
   brms,  # Bayesian Regression Models using 'Stan'
-  # devtools::install_github("mvuorre/brmstools")
   brmstools, #  post-processing functions for brmsfit object
   rstan,  # R interface to Stan
   rstanarm,  # rstanarm: Bayesian Applied Regression Modeling via Stan
@@ -39,16 +38,16 @@ source(here("R", "helper_fxs.R"))  # helper functions for data cleaning
 
 # Source xrefs tables for ports, species
 xref_ports <- 
-  read_csv(here("data-raw", "xref-sites-ports-regions.csv")) |> 
+  read_csv(here("out", "xrefs", "xref-sites-ports-regions.csv")) |> 
   cleans_names_and_caps()
 
 xref_compartments <- 
-  read_csv(here("data-raw", "xref_taxa_compartment.csv")) |> 
+  read_csv(here("out", "xrefs", "xref_taxa_compartment.csv")) |> 
   cleans_names_and_caps()
 
 # load scientific names
 xref_sci_names <- 
-  read.csv(here("data-raw", "xref_species_names.csv")) |> 
+  read.csv(here("out", "xrefs", "xref_species_names.csv")) |> 
   mutate(common_name = str_to_lower(common_name))
 
 
