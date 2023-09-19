@@ -1287,9 +1287,6 @@ data <- data |>
   mutate(
     d13c_norm = case_when(
       # non-zoop inverts = Logan et al. (2008)
-      # compartment == "benthic inverts" ~ 
-      #   0.967 * d13c + 0.861,
-      # non-zoop inverts = Logan et al. (2008)
       compartment %in% c("benthic inverts","dreissenids") & cn > 3.25 ~ 
         0.967 * d13c + 0.861,
       # zoops = Smyntek et al. (2007)
