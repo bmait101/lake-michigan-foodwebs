@@ -1,6 +1,19 @@
 source(here::here("R", "00_prep.R"))
 source(here::here("R", "02_prep-data.R"))
 
+mytheme <- function(base_size = 18, base_family="helvetica", axis_text_adj = 2) {
+  theme_minimal(base_size = base_size) + 
+    theme(axis.line = element_line(colour="black"), 
+          panel.grid = element_blank(), 
+          axis.text.x = element_text(size = base_size - axis_text_adj, vjust = -1.5, margin = margin(t = 0.5, b = 10)), 
+          axis.text.y = element_text(size = base_size - axis_text_adj, hjust = 0, margin = margin(r = 0.5, l = 12)), 
+          axis.title.y = element_text(angle = 90, vjust = 0, margin = margin(r = 10, l = 0.5)),
+          axis.title.x = element_text(vjust = -0.2, margin = margin(t = 10, b = 0.5)), 
+          plot.margin = unit(c(10,5,5,5),"mm"), 
+          strip.background = element_rect(colour = "white", fill = "transparent")
+    )
+}
+
 ## Summary ========================
 
 summary(df)
@@ -21,15 +34,25 @@ df |> count(compartment, species)
 # List of ports for map making
 df |> 
   distinct(port) |> 
-  # print(n=Inf) |> 
-  write_csv(here("out", "tbls", "list-of-ports_v2.csv"))
+  write_csv(here("out", "xrefs", "list-of-ports.csv"))
 
 
 # List of iso samples for appendix
 df |>
-  count(dataset, compartment, sci_name, lake_region, season) |>
-  pivot_wider(names_from = c(lake_region, season), values_from = n, values_fill = 0) |>
-  print(n=Inf) |> 
+  count(compartment, sci_name, lake_region, season) |>
+  pivot_wider(
+    names_from = c(lake_region, season), 
+    values_from = n, 
+    values_fill = 0
+    ) |>
+  relocate(sw_spring, .before = sw_summer) |> 
+  relocate(sw_fall, .after = sw_summer) |> 
+  relocate(c(se_spring, se_summer, se_fall), .after = sw_fall) |> 
+  relocate(c(nw_spring, nw_summer, nw_fall), .after = se_fall) |> 
+  relocate(c(ne_spring, ne_summer, ne_fall), .after = nw_fall) |> 
+  janitor::clean_names(case = "title") |> 
+  rename("Scientific name" = "Sci Name", "Group" = "Compartment") |> 
+  print(n=Inf) |>
   write_csv(here("out", "tbls", "list-of-isotope-samples.csv"))
 
 # Body size summary
@@ -38,6 +61,13 @@ df |>
   group_by(compartment, sci_name) |> 
   summarise(mean_length = mean(length_mm, na.rm = TRUE), 
             mean_mass = mean(mass_g, na.rm = TRUE)) |> 
+  janitor::clean_names(case = "title") |>
+  rename(
+    "Scientific name" = "Sci Name", 
+    "Avg. Length (mm)" = "Mean Length", 
+    "Avg. wet mass (g)" = "Mean Mass", 
+    "Group" = "Compartment"
+    ) |> 
   print(n=Inf) |> 
   write_csv(here("out", "tbls", "body-size-summary.csv"))
 
@@ -167,9 +197,13 @@ df_plot |>
     "red","skyblue","green3","blue","purple","pink","darkblue", 
     "cyan", "cyan1","cyan2","cyan3","cyan3"
     )) + 
-  theme_clean()
+  labs(
+    x = expression(~{delta}^13*C["lipid corrected"]~'(\u2030)'), 
+    y = expression(~{delta}^15*N~'(\u2030)'), color = "", shape = ""
+  ) + 
+  mytheme()
 
-
+ggsave(here::here("out","plots","iso-biplot.png"), plot = last_plot(), dpi = 600, width = 10, height = 6)
 
 
 
