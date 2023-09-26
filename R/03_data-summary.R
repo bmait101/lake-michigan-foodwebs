@@ -36,6 +36,11 @@ df |>
   distinct(port) |> 
   write_csv(here("out", "xrefs", "list-of-ports.csv"))
 
+df |> 
+  distinct(port, depth_m) |> 
+  arrange(port, depth_m) |> 
+  write_csv(here("out", "xrefs", "list-of-ports-depth.csv"))
+
 
 # List of iso samples for appendix
 df |>
