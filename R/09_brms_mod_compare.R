@@ -4,11 +4,9 @@
 source(here::here("R", "00_prep.R"))
 
 # Data
-
 load(file = here("out", "data", "reg_mod_data_v3.RData"))
 
 # Model objects
-
 load(file = here("out", "models", "brms", "brm_mods_list_v2.RData"))
 load(file = here("out", "models", "brms", "brm_mods_list_asym.RData"))
 
