@@ -1307,8 +1307,7 @@ skim(data)
 #port
 #depth
 
-save(data, file = here("out", "data", "compiled_data_v4.RData"))
-#v4 = duplicate samples removed
+save(data, file = here("out", "data", "compiled_data_v3.RData"))
 
 # load(here("out", "data", "compiled_data_v2.RData"))
 
