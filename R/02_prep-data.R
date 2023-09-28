@@ -180,4 +180,6 @@ df <- df |>
 # vis_miss(df)
 # 46% missing mass to 11% 
 
+## Save analysis dataset to file
+df |> write_csv(here("out","data","df_clean_analysis.csv"))
 
