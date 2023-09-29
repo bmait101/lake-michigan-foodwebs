@@ -1,36 +1,28 @@
 # TP models
 
-
-
 # Controls ===================
 
 # for parallel processing
 cl <- parallel::makePSOCKcluster(parallel::detectCores())
 
-
 # Data ===============================
 
-source(here::here("R", "00_prep.R"))
-source(here::here("R", "02_prep_data.R"))
-
+source(here::here("R", "00_prep.R"))  # libs and xref tables
+# source(here::here("R", "02_prep_data.R"))
+df <- read_csv(here("out","data","dataset_for_analysis.csv"))
 
 ## Scales subsets ===================================================================
 
 data_subs <- list(
-  
   # Pooled baselines
-  
   df |> mutate(scale = "pooled") |> droplevels() |> as.data.frame(),
-  # df |> mutate(scale = "pooled", species = paste(species,basin,sep="_")) |> droplevels() |> as.data.frame(),
+  df |> mutate(scale = "pooled", species = paste(species,basin,sep="_")) |> droplevels() |> as.data.frame(),
   df |> mutate(scale = "pooled", species = paste(species,lake_region,sep="_")) |> droplevels() |> as.data.frame(),
   df |> mutate(scale = "pooled", species = paste(species,lake_region,season,sep="_")) |> droplevels() |> as.data.frame(),
-  # df |> mutate(scale = "pooled", species = paste(species,lake_region,season,year,sep="_")) |> droplevels() |> as.data.frame()
 
   # Specific baselines
-  
   df |> mutate(scale = basin) |> droplevels() |> as.data.frame(),
   df |> mutate(scale = lake_region) |> droplevels() |> as.data.frame(),
-  df |> mutate(scale = season) |> droplevels() |> as.data.frame(),
   df |> mutate(scale = paste(basin, season, sep = "_")) |> droplevels() |> as.data.frame(),
   df |> mutate(scale = paste(lake_region, season, sep = "_")) |> droplevels() |> as.data.frame()
   
@@ -42,43 +34,34 @@ names(data_subs) <- c(
 )
 
 # Individual levels
-# data_subs_15_ind <- list(
-#   df |>
-#     mutate(scale = "pooled") |>
-#     mutate(species = paste(ID, species, sep = "_")) |>
-#     droplevels() |> 
-#     as.data.frame(),
-#   df |>
-#     mutate(scale = lake_region) |>
-#     mutate(species = paste(ID, species, sep = "_")) |>
-#     droplevels() |>
-#     as.data.frame(),
-#   df |>
-#     mutate(scale = paste(lake_region, season, sep = "_")) |>
-#     mutate(species = paste(ID, species, sep = "_")) |>
-#     droplevels() |>
-#     as.data.frame()
-#   )
-# 
-# names(data_subs_15_ind) <- c(
-#   "scale01_ind", "scale02_ind", "scale03_ind"
-# )
+data_subs_15_ind <- list(
+  df |>
+    mutate(scale = "pooled") |>
+    mutate(species = paste(ID, species, sep = "_")) |>
+    droplevels() |>
+    as.data.frame(),
+  df |>
+    mutate(scale = lake_region) |>
+    mutate(species = paste(ID, species, sep = "_")) |>
+    droplevels() |>
+    as.data.frame(),
+  df |>
+    mutate(scale = paste(lake_region, season, sep = "_")) |>
+    mutate(species = paste(ID, species, sep = "_")) |>
+    droplevels() |>
+    as.data.frame()
+  )
+
+names(data_subs_15_ind) <- c(
+  "scale01_ind", "scale02_ind", "scale03_ind"
+)
 
 save(data_subs, file = here("out", "data", "data_subs.RData"))
-# save(data_subs_15_ind, file = here("out", "data", "data_subs_2015_ind_4regions.RData"))
 
 
 # Viz data ----------------------------
 
 data_subs$s5 |>
-  # filter(! trophic %in% c("b1", "b2")) |>
-  # mutate(trophic = case_when(
-  #   species == "oligochaete" ~ "benthic",
-  #   species == "amphipod" ~ "benthic",
-  #   species == "chironomids" ~ "benthic",
-  #   species == "dreissena" ~ "pelagic",
-  #   TRUE ~ trophic
-  # )) |>
   ggplot(aes(d13c_norm, d15n)) +
   geom_point(aes(color = trophic), size = 2, alpha = .5) +
   facet_wrap(vars(scale)) +
@@ -159,5 +142,5 @@ for (i in 1:length(iso_lists)){ # change object based on data subset object
 
 # Save
 save(tp_mods, file = here("out", "models", "tp", "tp_mods.RData"))
-# save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
+save(tp_mods_2015_ind, file = here("out", "models", "tp", "tp_mods_2015_ind.RData"))
 
