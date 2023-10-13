@@ -7,7 +7,7 @@ load(file = here("out", "data", "reg_mod_data_v3.RData"))
 
 # Model objects
 
-load(file = here("out", "models", "brms", "brm_mods_list.RData"))
+load(file = here("out", "models", "brms", "brm_mods_list_v2.RData"))
 load(file = here("out", "models", "brms", "brm_mods_list_asym.RData"))
 
 names(brm_mods_list)
@@ -412,7 +412,12 @@ ggsave(
   device = png
   )
 
-
+path <- here::here("out","plots","result_3ab_wide_final")
+ggsave(glue::glue("{path}.pdf"), plot = p11, 
+       width = 18, height = 9, units = "cm", scale = 1, device = cairo_pdf)
+pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
+                      filenames = glue::glue("{path}.png"),
+                      format = "png", dpi = 300)
 
 
 
