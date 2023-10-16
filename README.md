@@ -1,37 +1,23 @@
 # Lake Michigan Food Web Architecture
 
-<img align="right" src="img/LM_bathy-map.png" alt="lm-bathy" width="300" style="margin-top: 20px">
+<img align="right" src="img/fig01.jpg" alt="fig01-concept" width="300" style="margin-top: 20px">
 
-Repo for Lake Michigan Food Web Architecture project. 
+Repo for Lake Michigan Food Web Architecture project. In review at **Ecology**. 
 
-The landscape theory of food web architecture (LTWFA; [Rooney et al. 2008](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2008.01193.x)) describes relationships among animal body size, mobility, and coupling of energy channels from heterogeneous habitats. As such, it can help predict which species are likely to play a critical role in connecting different parts of a food web. However, empirical tests of the LTWFA are rare and support differs among terrestrial, freshwater, and marine systems. Further. the LTWFA has not yet been tested in the Great Lakes and it remains unclear whether the theory applies in highly invaded ecosystems such as Lake Michigan. In this project, we will test predictions of the LTWFA by quantifying links among animal body size, trophic position, and the coupling of energy channels from heterogeneous habitats using carbon and nitrogen stable isotope ratio data from organisms throughout the Lake Michigan food web.
-
-Collaborators: 
-
-* [Fred Keppeler](https://fkeppeler.github.io/) (UW-Madison CFL)
-* [Olaf Jensen](https://jensen.limnology.wisc.edu/) (UW-Madison CFL)
-* [Joel Hoffman](https://www.researchgate.net/profile/Joel-Hoffman) (EPA)
-* [Bo Bunnell](https://www.usgs.gov/staff-profiles/david-b-bunnell) (USGS GLSC)
-* [Scott McNaught](http://people.se.cmich.edu/mcnau1as/) (Central Michigan University)
-
+Abstract: The landscape theory of food web architecture (LTFWA) describes relationships among body size, trophic position, mobility, and energy channels that serve to couple heterogeneous habitats, which in turn promotes long-term system stability. However, empirical tests of the LTFWA are rare and support differs among terrestrial, freshwater, and marine systems. Further, it is unclear if the theory applies in highly altered ecosystems dominated by introduced species such as the Laurentian Great Lakes. Here, we provide an empirical test of the LTFWA by relating body size, trophic position, and the coupling of different energy channels using stable isotope data from species throughout the Lake Michigan food web. We found that body size was positively related to trophic position, but for a given trophic position, organisms predominately supported by pelagic energy had smaller body sizes than organisms predominately supported by nearshore benthic energy. We also found a gradual increase in the coupling of pelagic and nearshore energy channels with larger body sizes as well as higher trophic positions. Results suggest a hump-shaped trophic relationship between basal energy source and trophic position in large lakes where there is increased coupling of benthic and pelagic energy channels as trophic position increases, highlighting the role of body size and the importance of connectivity among habitats in structuring large lake food webs. However, important deviations from expectations are suggestive of how species introductions and other anthropogenic impacts can affect food web structure in large lakes. First, native top predators appear to be flexible couplers that may provide food web resilience, whereas introduced top predators may confer less stability as they specialize on a single energy pathway. Second, some smaller bodied prey fish and invertebrates, in addition to mobile predators, coupled energy from pelagic and nearshore energy channels, which suggests that some prey species may also be important integrators of energy pathways in the system. We conclude that patterns predicted by the LTFWA are to a large degree robust and persistent in the face of  species introductions and other anthropogenic stressors, but time-series evaluations are needed to fully understand the mechanisms that promote stability. 
 
 ## Folders 
 
-**R:** 
+**R** 
 - Contains .R files to clean data, run analyses, and make figures. 
 - Run R/00_prep.R before running any other scripts.
-- R/03_tp_models takes ~12 hours to run (individual models ~ 8 hours)
-- R/05_brms_models takes ~ 2 hours to run
 
 **data-raw**
 - Contains raw, flat data files
 
 **out**
 - Contains output created using script in the R folder
-- Because they are too large, estimate model objects from tRophicposion and brms are not uploaded. They can be downloaded [here](https://drive.google.com/drive/folders/1oCmnLMbQSnCN5oI8_hBjcKneRu_XxpSW?usp=sharing). 
-  - the brm_mods_2015.RData file should be put into out/models/brms dir. 
-  - the tp models must be unzipped and put into the out/models/tp dir. 
+- Because they are too large, estimate model objects from tRophicposion and brms are not uploaded. 
 
 **img**
-
 - images used in project
