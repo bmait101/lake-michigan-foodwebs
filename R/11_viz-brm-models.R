@@ -119,14 +119,16 @@ plot_tp_x_alpha <- function(brm_mod_obj, mod_data){
     # coord_cartesian(xlim = c(0, max(mod_data$TP_mode) + 0.5)) +
     labs(y = "log body mass (g)", x = "Trophic position", fill = "Alpha") + 
     theme_clean() + 
-    # theme(legend.position = c(0.08, .85)) + 
-    theme(legend.position = "none")
+    # theme(legend.position = "none")
+    theme(legend.position = c(0.2, .85), 
+          legend.key.width = unit(.1, "cm"), 
+          legend.key.height = unit(.2, "cm"))
   p1
 }
 
 # test it
-plot_mass_x_alpha(brm_mods_list[["brm_mods_1"]][[1]], reg_mod_data_tidy[["p1"]])
-# plot_tp_x_alpha(brm_mods_list_asym[["brm_mods_1_asym"]][[1]], reg_mod_data_tidy[["p1"]])
+# plot_mass_x_alpha(brm_mods_list[["brm_mods_1"]][[1]], reg_mod_data_tidy[["p1"]])
+plot_tp_x_alpha(brm_mods_list_asym[["brm_mods_1_asym"]][[1]], reg_mod_data_tidy[["p1"]])
 
 
 ## Loop over models/data and plot
@@ -168,11 +170,11 @@ names(plots_asym) <- c(
 ## Alpha ~ TP (species) ---------------------------------------
 
 ### Quick plots ----------
-plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[4]]), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4"]][[6]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2"]][[6]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5"]][[6]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4"]][[8]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[4]]), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4"]][[6]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2"]][[6]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5"]][[6]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4"]][[8]], re_formula = NULL), points = TRUE)
 
 ### Custom plots --------------
 
@@ -197,8 +199,8 @@ plot_alpha_tp <- function(mods, data) {
 }
 
 # test it
-plot_alpha_tp(brm_mods_list[["brm_mods_1"]][[4]],  reg_mod_data_tidy[["p1"]])
-plot_alpha_tp(brm_mods_list[["brm_mods_2b_p4"]][[6]],  reg_mod_data_tidy[["p2"]])
+# plot_alpha_tp(brm_mods_list[["brm_mods_1"]][[4]],  reg_mod_data_tidy[["p1"]])
+# plot_alpha_tp(brm_mods_list[["brm_mods_2b_p4"]][[6]],  reg_mod_data_tidy[["p2"]])
 
 ## Loop over models/data and plot
 plot_mods_alpha_tp <- list(
@@ -221,11 +223,11 @@ names(plots_alpha_tp) <- c(
 ## Alpha ~ TP (ind) ---------------------------------------
 
 ### Quick plots -----------
-plot(conditional_effects(brm_mods_list[["brm_mods_1_ind"]][[1]]), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2_ind"]][[1]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4_ind"]][[1]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4_ind"]][[1]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5_ind"]][[1]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_1_ind"]][[1]]), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2_ind"]][[1]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4_ind"]][[1]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4_ind"]][[1]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5_ind"]][[1]], re_formula = NULL), points = TRUE)
 
 ### Custom plots --------------
 
@@ -250,9 +252,9 @@ plot_alpha_tp_ind <- function(mods, data) {
 }
 
 # test it
-plot_alpha_tp_ind(brm_mods_list[["brm_mods_1_ind"]][[1]],  reg_mod_data_tidy[["p1_id"]])
-plot_alpha_tp_ind(brm_mods_list[["brm_mods_2b_p4_ind"]][[1]],  reg_mod_data_tidy[["p4_id"]])
-plot_alpha_tp_ind(brm_mods_list[["brm_mods_3b_p5_ind"]][[1]],  reg_mod_data_tidy[["p5_id"]])
+# plot_alpha_tp_ind(brm_mods_list[["brm_mods_1_ind"]][[1]],  reg_mod_data_tidy[["p1_id"]])
+# plot_alpha_tp_ind(brm_mods_list[["brm_mods_2b_p4_ind"]][[1]],  reg_mod_data_tidy[["p4_id"]])
+# plot_alpha_tp_ind(brm_mods_list[["brm_mods_3b_p5_ind"]][[1]],  reg_mod_data_tidy[["p5_id"]])
 
 
 ## Loop over models/data and plot
@@ -286,11 +288,11 @@ names(plots_alpha_tp_ind) <- c(
 ## Alpha ~ mass -------------------------------- 
 
 ### Quick plots -----------------
-plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[7]]), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4"]][[11]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2"]][[11]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5"]][[11]], re_formula = NULL), points = TRUE)
-plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4"]][[11]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[7]]), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4"]][[11]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2"]][[11]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5"]][[11]], re_formula = NULL), points = TRUE)
+# plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4"]][[11]], re_formula = NULL), points = TRUE)
 
 ### Custom plots ----------------
 
@@ -339,11 +341,10 @@ names(plots_alpha_mass) <- c(
 
 # Compose figure ---------------------------------------
 
-names(plots_asym)
-names(plots_alpha_tp)
-names(plots_alpha_tp_ind)
-names(plots_alpha_mass)
-
+# names(plots_asym)
+# names(plots_alpha_tp)
+# names(plots_alpha_tp_ind)
+# names(plots_alpha_mass)
 
 p1 <- ((plots_asym[[1]] | plots_alpha_mass[[1]] | plots_alpha_tp[[1]] | plots_alpha_tp_ind[[1]])) + 
   plot_annotation(
@@ -389,7 +390,7 @@ names(panel_plots) <- c(
 paths <- stringr::str_c(names(panel_plots), ".png")
 pwalk(
   list(paths, panel_plots), ggsave, 
-  path = here("out", "plots"),
+  path = here("out", "plots", "R1"),
   height = 5, 
   width = 18, 
   units = "cm", 
@@ -397,14 +398,21 @@ pwalk(
   )
  
 
+p4 / p5
+
+# decrease legend size 
+p <- (plots_asym[[4]])
+p <- p + theme(legend.title = element_text(size = 6), 
+               legend.text = element_text(size = 6))
+
 p11 <- ( 
-  (plots_asym[[4]] | plots_alpha_mass[[4]] | plots_alpha_tp[[4]] | plots_alpha_tp_ind[[4]]) /
-    (plots_asym[[5]] | plots_alpha_mass[[5]] | plots_alpha_tp[[5]] | plots_alpha_tp_ind[[5]]) 
+  (p | plots_alpha_mass[[4]] | plots_alpha_tp[[4]] | plots_alpha_tp_ind[[4]]) /
+    (plots_asym[[5]]+theme(legend.position = "none") | plots_alpha_mass[[5]] | plots_alpha_tp[[5]] | plots_alpha_tp_ind[[5]]) 
 ) + 
   plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")")
 
 ggsave(
-  here("out","plots","result_3ab_wide"),
+  here("out","plots","R1","result_3ab_wide.png"),
   p11, 
   height = 9, 
   width = 18, 
@@ -412,7 +420,7 @@ ggsave(
   device = png
   )
 
-path <- here::here("out","plots","result_3ab_wide_final")
+path <- here::here("out","plots","R1","result_3ab_wide_final")
 ggsave(glue::glue("{path}.pdf"), plot = p11, 
        width = 18, height = 9, units = "cm", scale = 1, device = cairo_pdf)
 pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
@@ -420,7 +428,7 @@ pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
                       format = "png", dpi = 300)
 
 
-
+# END
 
  # EXTRA ============================
 
