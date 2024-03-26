@@ -1,27 +1,25 @@
 # Load / install libraries, helpers, xrefs
 
-pacman::p_load(
-  here,  # file paths
-  tidyverse,  # ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
-  readxl, # read excels files
-  patchwork, # plot composition
-  ggnewscale, # use multiple scales in ggplot2
-  MetBrewer, # artsy palettes
-  fishualize,  # fishy palletts
-  janitor,  # cleaning data
-  visdat,  # data QC
-  skimr,  # data QC
-  parallel,  # support for parallel computing
-  tRophicPosition,  # Bayesian Trophic Position Estimation with Stable Isotopes 
-  brms,  # Bayesian Regression Models using 'Stan'
-  brmstools, #  post-processing functions for brmsfit object
-  rstan,  # R interface to Stan
-  rstanarm,  # rstanarm: Bayesian Applied Regression Modeling via Stan
-  tidybayes, # tidy data + ggplot workflow for bayes
-  broom,  # tidy statistical objects
-  performance # r2_bayes function
-  # conflicted
-)
+library(here)  # file paths
+library(tidyverse)  # ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
+library(readxl) # read excels files
+library(patchwork) # plot composition
+library(ggnewscale) # use multiple scales in ggplot2
+library(MetBrewer) # artsy palettes
+library(fishualize) # fishy palletts
+library(janitor) # cleaning data
+library(visdat) # data QC
+library(skimr) # data QC
+library(parallel)  # support for parallel computing
+library(tRophicPosition)  # Bayesian Trophic Position Estimation with Stable Isotopes 
+library(brms) # Bayesian Regression Models using 'Stan'
+library(brmstools) #  post-processing functions for brmsfit object
+library(rstan)  # R interface to Stan
+library(rstanarm) # rstanarm: Bayesian Applied Regression Modeling via Stan
+library(tidybayes) # tidy data + ggplot workflow for bayes
+library(broom)  # tidy statistical objects
+library(broom.mixed)  # tidy mixed models
+library(performance) # r2_bayes function
 
 # conflict_prefer("filter", "dplyr")
 # conflict_prefer("everything", "dplyr")
