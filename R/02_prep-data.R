@@ -181,5 +181,6 @@ df <- df |>
 # 46% missing mass to 11% 
 
 ## Save analysis dataset to file
-df |> write_csv(here("out","data","dataset_for_analysis.csv"))
+# df |> write_csv(here("out","data","dataset_for_analysis.csv"))
+df <- read_csv(here("out","data","dataset_for_analysis.csv"))
 
