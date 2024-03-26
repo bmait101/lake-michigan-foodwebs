@@ -1,9 +1,22 @@
-
 # Script to extract parameter estimates from Bayesian regression models
 
-# model objects
+# Prep =========================================================================
+
+source(here::here("R", "00_prep.R"))
+
+# Data
+load(file = here("out", "data", "reg_mod_data_v3.RData"))
+
+# Model objects
+load(file = here("out", "models", "brms", "brm_mods_list_v2.RData"))
+load(file = here("out", "models", "brms", "brm_mods_list_asym.RData"))
+
+# Check 
 names(brm_mods_list)
 names(brm_mods_list_asym)
+names(reg_mod_data_tidy)
+
+# Extract parameter estimates ==================================================
 
 # extract parameter
 summary(brm_mods_list[["brm_mods_1"]][[1]])$fixed |> 
@@ -61,7 +74,7 @@ mods_for_tabs <- list(
   
 )
 
-# Make tables and write to file
+# Make tables and write to file =================================================
 mods_for_tabs[1:4] |>
   map_df(make_param_tab) |> 
   add_row(`Fixed Parameter` = "Asymmetric TP-body size relationship", .before = 1) |> 
@@ -148,5 +161,40 @@ mods_for_tabs[17:20] |>
   mutate(across(everything(), as.character)) |> 
   mutate(across(everything(), ~replace_na(.x, " "))) |> 
   write_csv(here("out", "tbls", "brms_param_ests_scale03b_p5.csv"))
+
+
+
+## Hypothesis tests ===============================================================
+
+# Pooled baselines
+brm_mods_list_asym[["brm_mods_3b_s4_asym"]][[1]] |> hypothesis("TP_mode > 0")
+brm_mods_list_asym[["brm_mods_3b_s4_asym"]][[1]] |> hypothesis("Alpha_mode < 0")
+brm_mods_list_asym[["brm_mods_3b_s4_asym"]][[1]] |> hypothesis("TP_mode:Alpha_mode > 0")
+
+brm_mods_list[["brm_mods_3b_s4"]][[6]] |> hypothesis("polyAlpha_mode21 > 0")
+brm_mods_list[["brm_mods_3b_s4"]][[6]] |> hypothesis("polyAlpha_mode22 < 0")
+
+brm_mods_list[["brm_mods_3b_s4_ind"]][[1]] |> hypothesis("polyAlpha_mode21 > 0")
+brm_mods_list[["brm_mods_3b_s4_ind"]][[1]] |> hypothesis("polyAlpha_mode22 < 0")
+
+brm_mods_list[["brm_mods_3b_s4"]][[11]] |> hypothesis("polyAlpha_mode21 < 0")
+brm_mods_list[["brm_mods_3b_s4"]][[11]] |> hypothesis("polyAlpha_mode22 < 0")
+
+# Specific baselines
+brm_mods_list_asym[["brm_mods_3b_p5_asym"]][[4]] |> hypothesis("TP_mode > 0")
+brm_mods_list_asym[["brm_mods_3b_p5_asym"]][[4]] |> hypothesis("Alpha_mode < 0")
+
+brm_mods_list[["brm_mods_3b_p5"]][[8]] |> hypothesis("polyAlpha_mode21 > 0")
+brm_mods_list[["brm_mods_3b_p5"]][[8]] |> hypothesis("polyAlpha_mode22 < 0")
+
+brm_mods_list[["brm_mods_3b_p5_ind"]][[1]] |> hypothesis("polyAlpha_mode21 > 0")
+brm_mods_list[["brm_mods_3b_p5_ind"]][[1]] |> hypothesis("polyAlpha_mode22 < 0")
+
+brm_mods_list[["brm_mods_3b_p5"]][[11]] |> hypothesis("polyAlpha_mode21 < 0")
+brm_mods_list[["brm_mods_3b_p5"]][[11]] |> hypothesis("polyAlpha_mode22 < 0")
+
+
+
+
 
 
