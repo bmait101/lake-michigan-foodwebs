@@ -5,19 +5,18 @@
 source(here::here("R", "00_prep.R"))
 
 ## Data - load either/or below
-# source(here::here("R", "04_tp_process.R"))
 load(file = here("out", "data", "reg_mod_data_v3.RData"))
-
+names(reg_mod_data_tidy)
 
 # Controls ===================
 
-n_iter <- 2000  # testing
-n_cores <- 4
-n_chains <- 4
-# n_iter <- 4000  # full
-n_thin <- 1
-adapt_d <- .99
+n_cores = 4
+n_chains = 4
+n_thin = 1
+adapt_d = .99
 tree_depth = 20
+n_iter = 500  # testing
+# n_iter = 4000  # full
 
 
 # MODEL Structures ============================================================
@@ -45,27 +44,27 @@ model_str_1_ind <- list(
   bf(TP_mode | weights(wei) ~ 1)
 )
 
-# Scale 2a - specific, baselines by basin
-model_str_2a_basin <- list(
-  # Asymmetric TP-body size relationship
-  bf(TP_mode ~ log_mass * Alpha_mode + (1|basin)),
-  bf(TP_mode ~ log_mass + Alpha_mode + (1|basin)),
-  bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|basin)),
-  bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|basin)),
-  bf(TP_mode ~ 1 + (1|basin)),
-  # Coupling of different energy pathways - TP
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|basin)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|basin)),
-  bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
-  bf(TP_mode ~ 1 + (1|basin)),
-  # Coupling of different energy pathways - Size
-  bf(log_mass ~ poly(Alpha_mode,2) + (1|basin)),
-  bf(log_mass ~ poly(Alpha_mode,1) + (1|basin)),
-  bf(log_mass ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
-  bf(log_mass ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
-  bf(log_mass ~ 1 + (1|basin))
-)
+# # Scale 2a - specific, baselines by basin
+# model_str_2a_basin <- list(
+#   # Asymmetric TP-body size relationship
+#   bf(TP_mode ~ log_mass * Alpha_mode + (1|basin)),
+#   bf(TP_mode ~ log_mass + Alpha_mode + (1|basin)),
+#   bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|basin)),
+#   bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|basin)),
+#   bf(TP_mode ~ 1 + (1|basin)),
+#   # Coupling of different energy pathways - TP
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|basin)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|basin)),
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
+#   bf(TP_mode ~ 1 + (1|basin)),
+#   # Coupling of different energy pathways - Size
+#   bf(log_mass ~ poly(Alpha_mode,2) + (1|basin)),
+#   bf(log_mass ~ poly(Alpha_mode,1) + (1|basin)),
+#   bf(log_mass ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
+#   bf(log_mass ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
+#   bf(log_mass ~ 1 + (1|basin))
+# )
 
 # Scale 2b - specific, baselines by lake_region
 model_str_2b_region <- list(
@@ -89,14 +88,14 @@ model_str_2b_region <- list(
   bf(log_mass ~ 1 + (1|lake_region))
 )
 
-model_str_2a_ind <- list(
-  # Coupling of different energy pathways - TP
-  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (1|basin)),
-  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (1|basin)),
-  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
-  bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
-  bf(TP_mode | weights(wei) ~ 1 + (1|basin))
-)
+# model_str_2a_ind <- list(
+#   # Coupling of different energy pathways - TP
+#   bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (1|basin)),
+#   bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (1|basin)),
+#   bf(TP_mode | weights(wei) ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin)),
+#   bf(TP_mode | weights(wei) ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin)),
+#   bf(TP_mode | weights(wei) ~ 1 + (1|basin))
+# )
 
 model_str_2b_ind <- list(
   # Coupling of different energy pathways - TP
@@ -108,26 +107,26 @@ model_str_2b_ind <- list(
 )
 
 # Scale 3a - specific, baselines by basin x season
-model_str_3a_basin_season <- list(
-  # Asymmetric TP-body size relationship
-  bf(TP_mode ~ log_mass * Alpha_mode + (1|basin) + (1|season)),
-  bf(TP_mode ~ log_mass + Alpha_mode + (1|basin) + (1|season)),
-  bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|basin) + (log_mass|season)),
-  bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|basin) + (log_mass|season)),
-  bf(TP_mode ~ 1 + (1|basin) + (1|season)),
-  # Coupling of different energy pathways - TP
-  bf(TP_mode ~ poly(Alpha_mode,2) + (1|basin) + (1|season)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (1|basin) + (1|season)),
-  bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin) + (poly(Alpha_mode,2)|season)),
-  bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin) + (poly(Alpha_mode,1)|season)),
-  bf(TP_mode ~ 1 + (1|basin) + (1|season)),
-  # Coupling of different energy pathways - Size
-  bf(log_mass ~ poly(Alpha_mode,2) + (1|basin) + (1|season)),
-  bf(log_mass ~ poly(Alpha_mode,1) + (1|basin) + (1|season)),
-  bf(log_mass ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin) + (poly(Alpha_mode,2)|season)),
-  bf(log_mass ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin) + (poly(Alpha_mode,1)|season)),
-  bf(log_mass ~ 1 + (1|basin) + (1|season))
-)
+# model_str_3a_basin_season <- list(
+#   # Asymmetric TP-body size relationship
+#   bf(TP_mode ~ log_mass * Alpha_mode + (1|basin) + (1|season)),
+#   bf(TP_mode ~ log_mass + Alpha_mode + (1|basin) + (1|season)),
+#   bf(TP_mode ~ log_mass * Alpha_mode + (log_mass|basin) + (log_mass|season)),
+#   bf(TP_mode ~ log_mass + Alpha_mode + (log_mass|basin) + (log_mass|season)),
+#   bf(TP_mode ~ 1 + (1|basin) + (1|season)),
+#   # Coupling of different energy pathways - TP
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (1|basin) + (1|season)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (1|basin) + (1|season)),
+#   bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin) + (poly(Alpha_mode,2)|season)),
+#   bf(TP_mode ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin) + (poly(Alpha_mode,1)|season)),
+#   bf(TP_mode ~ 1 + (1|basin) + (1|season)),
+#   # Coupling of different energy pathways - Size
+#   bf(log_mass ~ poly(Alpha_mode,2) + (1|basin) + (1|season)),
+#   bf(log_mass ~ poly(Alpha_mode,1) + (1|basin) + (1|season)),
+#   bf(log_mass ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|basin) + (poly(Alpha_mode,2)|season)),
+#   bf(log_mass ~ poly(Alpha_mode,1) + (poly(Alpha_mode,1)|basin) + (poly(Alpha_mode,1)|season)),
+#   bf(log_mass ~ 1 + (1|basin) + (1|season))
+# )
 
 # Scale 3b - specific, baselines by region x season
 # Maybe add simulated littoral baselines for these two subsets????
