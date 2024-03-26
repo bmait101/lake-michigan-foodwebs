@@ -1,5 +1,6 @@
 source(here::here("R", "00_prep.R"))
-source(here::here("R", "02_prep-data.R"))
+# source(here::here("R", "02_prep-data.R"))
+df <- read_csv(here("out","data","dataset_for_analysis.csv"))
 
 mytheme <- function(base_size = 18, base_family="helvetica", axis_text_adj = 2) {
   theme_minimal(base_size = base_size) + 
@@ -27,118 +28,118 @@ vis_dat(df)
 vis_miss(df)
 
 # Counts by species and compartment
-df |> count(species)|> arrange(n) |>  print(n=Inf)
-df |> count(compartment, species)
+# df |> count(species)|> arrange(n) |>  print(n=Inf)
+# df |> count(compartment, species)
 
 
 # List of ports for map making
-df |> 
-  distinct(port) |> 
-  write_csv(here("out", "xrefs", "list-of-ports.csv"))
-
-df |> 
-  distinct(port, depth_m) |> 
-  arrange(port, depth_m) |> 
-  write_csv(here("out", "xrefs", "list-of-ports-depth.csv"))
+# df |> 
+#   distinct(port) |> 
+#   write_csv(here("out", "xrefs", "list-of-ports.csv"))
+# 
+# df |> 
+#   distinct(port, depth_m) |> 
+#   arrange(port, depth_m) |> 
+#   write_csv(here("out", "xrefs", "list-of-ports-depth.csv"))
 
 
 # List of iso samples for appendix
-df |>
-  count(compartment, sci_name, lake_region, season) |>
-  pivot_wider(
-    names_from = c(lake_region, season), 
-    values_from = n, 
-    values_fill = 0
-    ) |>
-  relocate(sw_spring, .before = sw_summer) |> 
-  relocate(sw_fall, .after = sw_summer) |> 
-  relocate(c(se_spring, se_summer, se_fall), .after = sw_fall) |> 
-  relocate(c(nw_spring, nw_summer, nw_fall), .after = se_fall) |> 
-  relocate(c(ne_spring, ne_summer, ne_fall), .after = nw_fall) |> 
-  janitor::clean_names(case = "title") |> 
-  rename("Scientific name" = "Sci Name", "Group" = "Compartment") |> 
-  print(n=Inf) |>
-  write_csv(here("out", "tbls", "list-of-isotope-samples.csv"))
+# df |>
+#   count(compartment, sci_name, lake_region, season) |>
+#   pivot_wider(
+#     names_from = c(lake_region, season), 
+#     values_from = n, 
+#     values_fill = 0
+#     ) |>
+#   relocate(sw_spring, .before = sw_summer) |> 
+#   relocate(sw_fall, .after = sw_summer) |> 
+#   relocate(c(se_spring, se_summer, se_fall), .after = sw_fall) |> 
+#   relocate(c(nw_spring, nw_summer, nw_fall), .after = se_fall) |> 
+#   relocate(c(ne_spring, ne_summer, ne_fall), .after = nw_fall) |> 
+#   janitor::clean_names(case = "title") |> 
+#   rename("Scientific name" = "Sci Name", "Group" = "Compartment") |> 
+#   print(n=Inf) |>
+#   write_csv(here("out", "tbls", "list-of-isotope-samples.csv"))
 
 # Body size summary
-df |> 
-  select(compartment, sci_name, length_mm, mass_g) |> 
-  group_by(compartment, sci_name) |> 
-  summarise(mean_length = mean(length_mm, na.rm = TRUE), 
-            mean_mass = mean(mass_g, na.rm = TRUE)) |> 
-  janitor::clean_names(case = "title") |>
-  rename(
-    "Scientific name" = "Sci Name", 
-    "Avg. Length (mm)" = "Mean Length", 
-    "Avg. wet mass (g)" = "Mean Mass", 
-    "Group" = "Compartment"
-    ) |> 
-  print(n=Inf) |> 
-  write_csv(here("out", "tbls", "body-size-summary.csv"))
+# df |> 
+#   select(compartment, sci_name, length_mm, mass_g) |> 
+#   group_by(compartment, sci_name) |> 
+#   summarise(mean_length = mean(length_mm, na.rm = TRUE), 
+#             mean_mass = mean(mass_g, na.rm = TRUE)) |> 
+#   janitor::clean_names(case = "title") |>
+#   rename(
+#     "Scientific name" = "Sci Name", 
+#     "Avg. Length (mm)" = "Mean Length", 
+#     "Avg. wet mass (g)" = "Mean Mass", 
+#     "Group" = "Compartment"
+#     ) |> 
+#   print(n=Inf) |> 
+#   write_csv(here("out", "tbls", "body-size-summary.csv"))
 
 # Baseline summary stats
-df  |> 
-  filter(species %in% c("pom", "benthic algae")) |> 
-  group_by(species) |> 
-  summarise(
-    n = n(), 
-    `mean d13c` = mean(d13c_norm, na.rm = TRUE), 
-    `sd d13c` = sd(d13c_norm, na.rm = TRUE), 
-    `mean d15n` = mean(d15n, na.rm = TRUE),
-    `sd d15n` = sd(d15n, na.rm = TRUE)
-  )
-
-df  |> 
-  filter(species %in% c("pom", "benthic algae")) |> 
-  select(species, lake_region, season, d13c_norm, d15n) |> 
-  group_by(lake_region, season, species) |> 
-  summarise(
-    n = n(), 
-    `mean d13c` = mean(d13c_norm, na.rm = TRUE), 
-    `sd d13c` = sd(d13c_norm, na.rm = TRUE), 
-    `mean d15n` = mean(d15n, na.rm = TRUE),
-    `sd d15n` = sd(d15n, na.rm = TRUE)
-  )
+# df  |> 
+#   filter(species %in% c("pom", "benthic algae")) |> 
+#   group_by(species) |> 
+#   summarise(
+#     n = n(), 
+#     `mean d13c` = mean(d13c_norm, na.rm = TRUE), 
+#     `sd d13c` = sd(d13c_norm, na.rm = TRUE), 
+#     `mean d15n` = mean(d15n, na.rm = TRUE),
+#     `sd d15n` = sd(d15n, na.rm = TRUE)
+#   )
+# 
+# df  |> 
+#   filter(species %in% c("pom", "benthic algae")) |> 
+#   select(species, lake_region, season, d13c_norm, d15n) |> 
+#   group_by(lake_region, season, species) |> 
+#   summarise(
+#     n = n(), 
+#     `mean d13c` = mean(d13c_norm, na.rm = TRUE), 
+#     `sd d13c` = sd(d13c_norm, na.rm = TRUE), 
+#     `mean d15n` = mean(d15n, na.rm = TRUE),
+#     `sd d15n` = sd(d15n, na.rm = TRUE)
+#   )
 
 
 ## Plot data --------------
 
-df |> count(species) |> print(n=Inf)
-df |> count(compartment) |> print(n=Inf)
-
-df |> 
-  ggplot(aes(d13c_norm, d15n, color = trophic)) + 
-  facet_wrap(vars(season)) + 
-  geom_point() 
+# df |> count(species) |> print(n=Inf)
+# df |> count(compartment) |> print(n=Inf)
+# 
+# df |> 
+#   ggplot(aes(d13c_norm, d15n, color = trophic)) + 
+#   facet_wrap(vars(season)) + 
+#   geom_point() 
 
 # summary plots with isotope means
-df |> 
-  group_by(species) |> 
-  summarise(meanC = mean(d13c_norm), meanN = mean(d15n), 
-            sdC = sd(d13c_norm), sdN = sd(d15n)) |> 
-  ggplot(aes(meanC, meanN)) + 
-  geom_point(size = 3) + 
-  geom_errorbar(aes(ymin = meanN - sdN, ymax = meanN + sdN)) +
-  geom_errorbarh(aes(xmin = meanC - sdC, xmax = meanC + sdC)) +
-  ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50, size=3) +
-  theme_bw()
+# df |> 
+#   group_by(species) |> 
+#   summarise(meanC = mean(d13c_norm), meanN = mean(d15n), 
+#             sdC = sd(d13c_norm), sdN = sd(d15n)) |> 
+#   ggplot(aes(meanC, meanN)) + 
+#   geom_point(size = 3) + 
+#   geom_errorbar(aes(ymin = meanN - sdN, ymax = meanN + sdN)) +
+#   geom_errorbarh(aes(xmin = meanC - sdC, xmax = meanC + sdC)) +
+#   ggrepel::geom_text_repel(aes(label = species), max.overlaps = 50, size=3) +
+#   theme_bw()
 
 
-df |> 
-  filter(species%in%c("zooplankton63","zooplankton153","zooplankton240")) |> 
-  ggplot(aes(d13c_norm, d15n, color = species)) + 
-  geom_point(size = 3)
-
-df |> 
-  filter(compartment%in%c("pom","benthic algae")) |> 
-  ggplot(aes(d13c_norm, d15n, color = species)) + 
-  geom_point(size = 3) 
-
-df |> 
-  # filter(compartment%in%c("fishes")) |>
-  filter(compartment%in%c("zooplankton","benthic inverts")) |>
-  ggplot(aes(log(mass_g), d15n, color = species, shape = depth_g)) + 
-  geom_jitter(size = 2)
+# df |> 
+#   filter(species%in%c("zooplankton63","zooplankton153","zooplankton240")) |> 
+#   ggplot(aes(d13c_norm, d15n, color = species)) + 
+#   geom_point(size = 3)
+# 
+# df |> 
+#   filter(compartment%in%c("pom","benthic algae")) |> 
+#   ggplot(aes(d13c_norm, d15n, color = species)) + 
+#   geom_point(size = 3) 
+# 
+# df |> 
+#   # filter(compartment%in%c("fishes")) |>
+#   filter(compartment%in%c("zooplankton","benthic inverts")) |>
+#   ggplot(aes(log(mass_g), d15n, color = species, shape = depth_g)) + 
+#   geom_jitter(size = 2)
 
 
 df_plot <- df |> 
@@ -182,8 +183,8 @@ df_plot <- df |>
     "Brown Trout", "Lake Trout", "Chinook Salmon", "Coho Salmon", "Burbot"
   ))) 
 
-df_plot |> count(species) |> print(n=Inf)
-df_plot |> count(compartment)
+# df_plot |> count(species) |> print(n=Inf)
+# df_plot |> count(compartment)
 
 df_plot |> 
   # filter(trophic %in% c("b1", "b2")) |> 
@@ -208,9 +209,19 @@ df_plot |>
   ) + 
   mytheme()
 
-ggsave(here::here("out","plots","iso-biplot.png"), plot = last_plot(), dpi = 600, width = 10, height = 6)
+# ggsave(here::here("out","plots","iso-biplot.png"),
+#        plot = last_plot(),
+#        dpi = 600, 
+#        width = 10, 
+#        height = 6
+#        )
 
-
+path <- here::here("out","plots","R1","iso-biplot")
+ggsave(glue::glue("{path}.pdf"), plot = last_plot(), 
+       width = 18, height = 12, units = "cm", scale = 1.3, device = cairo_pdf)
+pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
+                      filenames = glue::glue("{path}.png"),
+                      format = "png", dpi = 300)
 
 
 df |> 
