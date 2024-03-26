@@ -167,13 +167,13 @@ names(plots_asym) <- c(
 
 # Coupling of energy pathways ------------------------------
 
-## Alpha ~ TP (species) ---------------------------------------
+## TP ~ Alpha (species) ---------------------------------------
 
 ### Quick plots ----------
 # plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[4]]), points = TRUE)
 # plot(conditional_effects(brm_mods_list[["brm_mods_2b_p4"]][[6]], re_formula = NULL), points = TRUE)
 # plot(conditional_effects(brm_mods_list[["brm_mods_2b_s2"]][[6]], re_formula = NULL), points = TRUE)
-# plot(conditional_effects(brm_mods_list[["brm_mods_3b_p5"]][[6]], re_formula = NULL), points = TRUE)
+plot(conditional_effects(m, re_formula = NULL), points = TRUE)
 # plot(conditional_effects(brm_mods_list[["brm_mods_3b_s4"]][[8]], re_formula = NULL), points = TRUE)
 
 ### Custom plots --------------
@@ -220,7 +220,7 @@ names(plots_alpha_tp) <- c(
   "alpha_tp_3b_p5_regionXseason"
 )
 
-## Alpha ~ TP (ind) ---------------------------------------
+## TP ~ alpha (ind) ---------------------------------------
 
 ### Quick plots -----------
 # plot(conditional_effects(brm_mods_list[["brm_mods_1_ind"]][[1]]), points = TRUE)
@@ -285,7 +285,7 @@ names(plots_alpha_tp_ind) <- c(
 )
 
 
-## Alpha ~ mass -------------------------------- 
+## Mass ~ alpha -------------------------------- 
 
 ### Quick plots -----------------
 # plot(conditional_effects(brm_mods_list[["brm_mods_1"]][[7]]), points = TRUE)
@@ -431,6 +431,22 @@ pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
 # END
 
  # EXTRA ============================
+
+
+plots_alpha_mass[[4]] + 
+  geom_point(aes(x=0.617, y=0.48), colour="red", size = 5)
+
+
+plots_alpha_tp[[5]] + 
+  geom_point(aes(x=.505, y=3.85), colour="red", size = 5) + 
+  geom_point(aes(x=.686, y=4.53), colour="black", size = 5)
+
+
+
+
+
+
+
 
 mods <- brm_mods_list[["brm_mods_3b_p5"]][[6]]
 dat <- reg_mod_data_tidy[["p5"]]
