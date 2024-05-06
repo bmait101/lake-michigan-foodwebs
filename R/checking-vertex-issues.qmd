@@ -63,6 +63,7 @@ m_list_verts <- list(
 Subset data and mode:
 
 ```{r}
+m <- mod_tmp2
 m <- m_list_verts[[5]]
 m_dat <- reg_mod_data_tidy[["p5"]]
 ```
@@ -91,22 +92,22 @@ p2 <- pred |>
   stat_lineribbon(.width = 0) + 
   scale_fill_brewer(palette = "Greys") + 
   geom_point(data = m_dat, aes(x = Alpha_mode, y = TP_mode)) + 
-  geom_vline(xintercept = get_vert2(m), color = "red", linewidth = 1) +
+  geom_vline(xintercept = get_vert(4.5,-3.57), color = "red", linewidth = 1) +
   theme(legend.position = "none") + 
   labs(title = "Orthogonal: predicted outcome", y = "predicted TP")
 
-# p3 <- plot(conditional_effects(m, re_formula = NULL), points = TRUE)
-# p3 <- conditional_effects(m, "Alpha_mode", re_formula = NULL)
-# # plot(p3, points = TRUE)
-# p3 <- p3$Alpha_mode |>
-#   ggplot(aes(x = Alpha_mode, y = estimate__)) +
-#   geom_ribbon(aes(ymin = lower__, ymax = upper__), alpha = .5) +
-#   geom_point(data = m_dat, aes(x = Alpha_mode, y = TP_mode)) +
-#   geom_line() +
-#   geom_vline(xintercept = 0, linewidth = 0.5, color = "grey50") +
-#   geom_hline(yintercept = 0, linewidth = 0.5, color = "grey50") +
-#   geom_vline(xintercept = get_vert2(m), color = "red", linewidth = 1) + 
-#   labs(title = "Orthogonal: predicted outcome", y = "predicted TP")
+p3 <- plot(conditional_effects(m, re_formula = NULL), points = TRUE)
+p3 <- conditional_effects(m, "Alpha_mode", re_formula = NULL)
+# plot(p3, points = TRUE)
+p3 <- p3$Alpha_mode |>
+  ggplot(aes(x = Alpha_mode, y = estimate__)) +
+  geom_ribbon(aes(ymin = lower__, ymax = upper__), alpha = .5) +
+  geom_point(data = m_dat, aes(x = Alpha_mode, y = TP_mode)) +
+  geom_line() +
+  geom_vline(xintercept = 0, linewidth = 0.5, color = "grey50") +
+  geom_hline(yintercept = 0, linewidth = 0.5, color = "grey50") +
+  geom_vline(xintercept = get_vert2(m), color = "red", linewidth = 1) +
+  labs(title = "Orthogonal: predicted outcome", y = "predicted TP")
 
 # parabola using model coefs
 # m_coefs <- m |> 
@@ -118,16 +119,16 @@ p2 <- pred |>
 # b_1 <- m_coefs |> filter(term == "polyAlpha_mode21") |> pull(estimate) |> unname()
 # b_2 <- m_coefs |> filter(term == "polyAlpha_mode22") |> pull(estimate) |> unname()
 
-a_parabola <- function(x) (-3.94 * x^2) + (4.06 * x) + 2.75
+a_parabola <- function(x) (-3.57 * x^2) + (4.5 * x) + 1.6
 p4 <- ggplot() +
   geom_vline(xintercept = 0, linewidth = 0.5, color = "grey50") +
   geom_hline(yintercept = 0, linewidth = 0.5, color = "grey50") +
   geom_function(fun = a_parabola, linewidth = 1) +
-  geom_vline(xintercept = get_vert2(m), color = "red", linewidth = 1) +
+  geom_vline(xintercept = get_vert(4.5,-3.57), color = "red", linewidth = 1) +
   geom_point(data = m_dat, aes(x = Alpha_mode, y = TP_mode)) + 
   labs(title = "Orthogonal: (-3.94 * x^2) + (4.06 * x) + 2.75")
 
-p3 | p4
+p2 | p4
 ```
 
 Run non-bayes models for comparison
@@ -144,29 +145,6 @@ pred_data$TP_mode = predict(fit2, newdata = pred_data, level = 0)
 with(pred_data, lines(Alpha_mode, TP_mode))
 abline(v = get_vert(coef(fit2)[2], coef(fit2)[3]), lty=2)
 
-# library(nlme)
-# lme1 <- lme(fixed = TP_mode ~ poly(Alpha_mode, 2, raw = FALSE), 
-#             random = ~ Alpha_mode | lake_region,
-#             data = m_dat)
-# lme2 <- lme(fixed = TP_mode ~ poly(Alpha_mode, 2, raw = TRUE), 
-#             random = ~ Alpha_mode | lake_region,
-#             data = m_dat)
-# get_vert(fixef(lme1)[2], fixef(lme1)[3])
-# get_vert(fixef(lme2)[2], fixef(lme2)[3])
-# 
-# with(m_dat, plot(Alpha_mode, TP_mode, pch = 16))
-# pred_data = data.frame(Alpha_mode = seq(0, 1, .05))
-# pred_data$TP_mode = predict(lme2, newdata = pred_data, level = 0)
-# with(pred_data, lines(Alpha_mode, TP_mode))
-# abline(v=get_vert(fixef(lme2)[2], fixef(lme2)[3]), lty=2)
-# 
-# a_parabola <- function(x) (fixef(lme2)[3] * x^2) + (fixef(lme2)[2] * x) + fixef(lme2)[1]
-# ggplot() +
-#   geom_vline(xintercept = 0, linewidth = 0.5, color = "grey50") +
-#   geom_hline(yintercept = 0, linewidth = 0.5, color = "grey50") +
-#   geom_function(fun = a_parabola, linewidth = 1) +
-#   geom_vline(xintercept = get_vert(fixef(lme2)[2], fixef(lme2)[3]), linetype = "dashed") + 
-#   geom_point(data = m_dat, aes(x = Alpha_mode, y = TP_mode))
 
 ```
 
@@ -177,39 +155,48 @@ Rerun the brms models a few different ways
 ```{r}
 # same model
 mod_tmp <- brm(
-  # bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region) + (poly(Alpha_mode,2)|season)),
-  bf(TP_mode ~ poly(Alpha_mode, 2) + (1 | lake_region) + (1 | season)),
+  bf(TP_mode ~ poly(Alpha_mode,2) + (poly(Alpha_mode,2)|lake_region) + (poly(Alpha_mode,2)|season)),
   m_dat, 
   control = list(adapt_delta=adapt_d, max_treedepth = tree_depth),
   seed=12345, chains=n_chains, iter=2000, thin=n_thin, cores=n_cores)
 
-# now with raw polys
+# change to raw polys
 mod_tmp1 <- brm(
-  bf(TP_mode ~ poly(Alpha_mode, 2, raw=TRUE) + (1 | lake_region) + (1 | season)),
+  bf(TP_mode ~ poly(Alpha_mode,2,raw=TRUE) + (poly(Alpha_mode,2,raw=TRUE)|lake_region) + (poly(Alpha_mode,2,raw=TRUE)|season)),
   m_dat, 
   control = list(adapt_delta=adapt_d, max_treedepth = tree_depth),
   seed=12345, chains=n_chains, iter=2000, thin=n_thin, cores=n_cores)
 
-# now without poly random effects
+# same but with I not poly()
 mod_tmp2 <- brm(
-  bf(TP_mode ~ poly(Alpha_mode,2) + (Alpha_mode|lake_region) + (Alpha_mode|season)),
-  m_dat,
+  bf(TP_mode ~ Alpha_mode + I(Alpha_mode^2) + (I(Alpha_mode^2)|lake_region) + (I(Alpha_mode^2)|season)),
+  m_dat, 
   control = list(adapt_delta=adapt_d, max_treedepth = tree_depth),
   seed=12345, chains=n_chains, iter=2000, thin=n_thin, cores=n_cores)
 
-# now without poly random effects but raw
+# raw and no random polys
+mod_tmp3 <- brm(
+  bf(TP_mode ~ Alpha_mode + I(Alpha_mode^2) + (Alpha_mode|lake_region) + (Alpha_mode|season)),
+  m_dat, 
+  control = list(adapt_delta=adapt_d, max_treedepth = tree_depth),
+  seed=12345, chains=n_chains, iter=2000, thin=n_thin, cores=n_cores)
+
+# also raw and no random polys
 mod_tmp4 <- brm(
   bf(TP_mode ~ poly(Alpha_mode,2,raw = TRUE) + (Alpha_mode|lake_region) + (Alpha_mode|season)),
-  m_dat,
+  m_dat, 
   control = list(adapt_delta=adapt_d, max_treedepth = tree_depth),
   seed=12345, chains=n_chains, iter=2000, thin=n_thin, cores=n_cores)
 
-loo(m, mod_tmp, mod_tmp1, mod_tmp2, mod_tmp4)
+
+loo(m, mod_tmp, mod_tmp1, mod_tmp2, mod_tmp3, mod_tmp4)
+
 get_vert2(m)
 get_vert2(mod_tmp)
-get_vert(4.24, -3.43)  #mod_tmp1
-get_vert2(mod_tmp2)
-get_vert(4.49, -3.6)  #mod_tmp4
+get_vert(4.55, -3.64)
+get_vert(4.5, -3.57)
+get_vert(4.49, -3.6)
+get_vert(4.49, -3.6)
 
 
 ```
@@ -218,7 +205,7 @@ The raw polys seems to fix this?
 
 ```{r}
 
-pred <- mod_tmp4 |> add_epred_draws(newdata = newdata, re_formula = NULL)
+pred <- mod_tmp2 |> add_epred_draws(newdata = newdata, re_formula = NULL)
 p5 <- pred |> 
   ggplot(aes(x = Alpha_mode, y = .epred)) +
   geom_vline(xintercept = 0, linewidth = 0.5, color = "grey50") +
