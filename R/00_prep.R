@@ -11,9 +11,9 @@ library(janitor) # cleaning data
 library(visdat) # data QC
 library(skimr) # data QC
 library(parallel)  # support for parallel computing
-library(tRophicPosition)  # Bayesian Trophic Position Estimation with Stable Isotopes 
+# library(tRophicPosition)  # Bayesian Trophic Position Estimation with Stable Isotopes 
 library(brms) # Bayesian Regression Models using 'Stan'
-library(brmstools) #  post-processing functions for brmsfit object
+# library(brmstools) #  post-processing functions for brmsfit object
 library(rstan)  # R interface to Stan
 library(rstanarm) # rstanarm: Bayesian Applied Regression Modeling via Stan
 library(tidybayes) # tidy data + ggplot workflow for bayes
@@ -21,14 +21,6 @@ library(broom)  # tidy statistical objects
 library(broom.mixed)  # tidy mixed models
 library(performance) # r2_bayes function
 
-# conflict_prefer("filter", "dplyr")
-# conflict_prefer("everything", "dplyr")
-# conflict_prefer("ar", "stats")
-# conflict_prefer("chisq.test", "stats")
-# conflict_prefer("dirichlet", "brms")
-# conflict_prefer("exponential", "brms")
-# conflict_prefer("extract", "rstan")
-# conflict_prefer("fisher.test", "stats")
 
 # Source helper fxs
 source(here("R", "helper_fxs.R"))  # helper functions for data cleaning
