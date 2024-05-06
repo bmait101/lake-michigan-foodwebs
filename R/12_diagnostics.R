@@ -16,11 +16,9 @@ library(bayesplot)
 color_scheme_set("brightblue")
 
 names(reg_mod_data_tidy)
-names(brm_mods_list_asym)
 names(brm_mods_list)
 
-mod_asym <- brm_mods_list_asym[["brm_mods_3b_s4_asym"]][[1]]
-mod_asym <- brm_mods_list_asym[["brm_mods_3b_p5_asym"]][[1]]
+mod_asym <- brm_mods_list[["brm_mods_3b_s4_ind"]][[1]]
 
 mod_couple_3bs4 <- brm_mods_list[["brm_mods_3b_s4"]][[6]]  # best fit coupling model with specific baselines
 mod_couple_3bp5 <- brm_mods_list[["brm_mods_3b_p5"]][[8]]  # best fit coupling model with pooled baselines
@@ -215,7 +213,7 @@ p.resid.panel <- p.resid.3bs4 / p.resid.3bp5
 p.resid.panel <- p.resid.panel & 
   plot_annotation(tag_levels = "a")
 
-path <- here::here("out", "plots", "residuals_coupling_panel")
+path <- here::here("out", "plots", "R1", "residuals_coupling_panel")
 ggsave(glue::glue("{path}.pdf"), plot = p.resid.panel, 
        width = 4, height = 4, scale = 1.5, device = cairo_pdf)
 pdftools::pdf_convert(pdf = glue::glue("{path}.pdf"),
