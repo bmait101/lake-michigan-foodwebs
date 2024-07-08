@@ -8,8 +8,7 @@
 
 # Load functions and compiled dataset
 source(here::here("R", "00_prep.R"))
-# load(here("out", "data", "compiled_data.RData"))
-load(here("out", "data", "compiled_data_v3.RData"))
+load(here("out", "data", "compiled_data.RData"))
 
 
 ### Initial prep  =============================================================
@@ -57,7 +56,7 @@ df <- df |>
 # df |> ggplot(aes(cn)) + geom_boxplot()  # large spread but okay
 
 
-# remove extreme outliers
+# remove extreme outliers flagged at isotope lab
 df |> filter(d13c_norm < -40)
 df |> filter(d13c_norm > -12)
 
@@ -91,8 +90,7 @@ df <- filter(df, ! d13c_norm > -12)
 
 
 # load/join log a and b parameters from L-W regressions (Bayes_LWR_Model.R)
-df_lw_params <- read_rds(here("out", "tbls", "body_mass_params.rds"))
-df_lw_params_v2 <- read_rds(here("out", "tbls", "body_mass_params_v2.rds")) |> 
+df_lw_params <- read_rds(here("out", "tbls", "body_mass_params.rds")) |> 
   mutate(across(c(log_a, b), as.numeric))
 
 df <- df |> 
@@ -117,7 +115,6 @@ df <-
 # 6% missing mass
 
 rm(df_lw_params)
-rm(df_lw_params_v2)
 
 ### Inverts ------------------------------------------------------
 

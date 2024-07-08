@@ -11,9 +11,9 @@ library(janitor) # cleaning data
 library(visdat) # data QC
 library(skimr) # data QC
 library(parallel)  # support for parallel computing
-# library(tRophicPosition)  # Bayesian Trophic Position Estimation with Stable Isotopes 
+library(tRophicPosition)  # Bayesian Trophic Position Estimation with Stable Isotopes
 library(brms) # Bayesian Regression Models using 'Stan'
-# library(brmstools) #  post-processing functions for brmsfit object
+library(brmstools) #  post-processing functions for brmsfit object
 library(rstan)  # R interface to Stan
 library(rstanarm) # rstanarm: Bayesian Applied Regression Modeling via Stan
 library(tidybayes) # tidy data + ggplot workflow for bayes
