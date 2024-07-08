@@ -42,7 +42,7 @@ vignettes/*.pdf
 *.DS_Store
 
 # model objects are too big to host on GitHub
-/data-raw
+*/data-raw
 /docs
 /notes
 
