@@ -48,7 +48,6 @@ vignettes/*.pdf
 
 /out/models
 /out/plots
-/out/plots-1
 /out/tbls
 /out/data-1
 /out/data/data_subs_ind_v3.RData
@@ -62,6 +61,8 @@ vignettes/*.pdf
 /R/checking-vertex-issues.qmd
 /R/load_csmi_lengths.R
 /R/vertex2.R
+
+/R-1
 
 /slides
 
