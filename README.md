@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/476374093.svg)](https://zenodo.org/doi/10.5281/zenodo.6963917)
+[![DOI](https://zenodo.org/badge/516023299.svg)](https://zenodo.org/doi/10.5281/zenodo.12690487)
 
 # Lake Michigan Food Web Architecture
 
