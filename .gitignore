@@ -42,15 +42,28 @@ vignettes/*.pdf
 *.DS_Store
 
 # model objects are too big to host on GitHub
-/out/models
-/docs
-/slides
-/notes
 /data-raw
-/out
+/docs
+/notes
 
-# obsidian notes
-.obsidian/
+/out/models
+/out/plots
+/out/tbls
+/out/data-1
+/out/data/data_subs_ind_v3.RData
+/out/data/data_subs_v3.RData
+/out/data/reg_mod_data_v3.RData
+
+/R/01_compile_data.R
+/R/02_prep-data.R
+/R/07_get_fishbase_TPs.R
+/R/08_brms_models_sigma.R
+/R/checking-vertex-issues.qmd
+/R/load_csmi_lengths.R
+/R/vertex2.R
+
+/slides
+
 
 
 
