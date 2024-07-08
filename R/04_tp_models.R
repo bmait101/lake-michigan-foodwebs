@@ -8,7 +8,6 @@ cl <- parallel::makePSOCKcluster(parallel::detectCores())
 # Data ===============================
 
 source(here::here("R", "00_prep.R"))  # libs and xref tables
-# source(here::here("R", "02_prep_data.R"))
 df <- read_csv(here("out","data","dataset_for_analysis.csv"))
 
 ## Scales subsets ===================================================================
@@ -52,10 +51,7 @@ data_subs_15_ind <- list(
     as.data.frame()
   )
 
-names(data_subs_15_ind) <- c(
-  "scale01_ind", "scale02_ind", "scale03_ind"
-)
-
+names(data_subs_15_ind) <- c("scale01_ind", "scale02_ind", "scale03_ind")
 save(data_subs, file = here("out", "data", "data_subs.RData"))
 
 
