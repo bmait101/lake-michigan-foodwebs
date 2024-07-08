@@ -1,5 +1,4 @@
 source(here::here("R", "00_prep.R"))
-# source(here::here("R", "02_prep-data.R"))
 df <- read_csv(here("out","data","dataset_for_analysis.csv"))
 
 mytheme <- function(base_size = 18, base_family="helvetica", axis_text_adj = 2) {
