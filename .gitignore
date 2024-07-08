@@ -48,6 +48,7 @@ vignettes/*.pdf
 
 /out/models
 /out/plots
+/out/plots-1
 /out/tbls
 /out/data-1
 /out/data/data_subs_ind_v3.RData
