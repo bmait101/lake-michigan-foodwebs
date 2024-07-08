@@ -1,6 +1,6 @@
 # Lake Michigan Food Web Architecture
 
-<img align="right" src="img/fig01.jpg" alt="fig01-concept" width="300" style="margin-top: 20px">
+<img align="right" src="img/fig01.png" alt="fig01-concept" width="300" style="margin-top: 20px">
 
 Repo for Lake Michigan Food Web Architecture project. 
 
