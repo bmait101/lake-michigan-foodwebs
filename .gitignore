@@ -43,7 +43,6 @@ vignettes/*.pdf
 
 # model objects are too big to host on GitHub
 /data-raw
-/data-raw-1
 /docs
 /notes
 
