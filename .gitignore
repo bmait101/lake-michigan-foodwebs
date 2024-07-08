@@ -54,15 +54,14 @@ vignettes/*.pdf
 /out/data/data_subs_v3.RData
 /out/data/reg_mod_data_v3.RData
 
-/R/01_compile_data.R
+/R/01_compile-data.R
 /R/02_prep-data.R
 /R/07_get_fishbase_TPs.R
 /R/08_brms_models_sigma.R
 /R/checking-vertex-issues.qmd
-/R/load_csmi_lengths.R
+/R/load_csmi_legnths.R
 /R/vertex2.R
 
-/R-1
 
 /slides
 
