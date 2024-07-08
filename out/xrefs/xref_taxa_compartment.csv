@@ -1,0 +1,77 @@
+﻿compartment,taxon,taxon_specific,taxon_code
+benthic inverts,amphipod,amphipod,amp
+benthic inverts,bentic inverts,bentic inverts,inv
+benthic inverts,chironomid,chironomid,chr
+benthic inverts,crayfish,crayfish,cra
+benthic inverts,dipteran,dipteran,dip
+benthic inverts,hydracarina,hydracarina,hyd
+benthic inverts,hydrachnidiae,hydrachnidiae,
+benthic inverts,isopod,isopod,iso
+benthic inverts,leech,leech,lee
+benthic inverts,oligochaete,oligochaete,olg
+benthic inverts,snail,snail,sna
+dreissenids,dreissenids,zebra,mus_z
+dreissenids,dreissenids,quagga,mus_q
+dreissenids,dreissenids,dreissenids,mus
+dreissenids,dreissenids,dreissenids_lg,musl
+dreissenids,dreissenids,dreissenids_med,musm
+dreissenids,dreissenids,dreissenids_sm,muss
+fishes,alewife,alewife plankton,AIP
+fishes,alewife,alewife,ALE
+fishes,alewife,alewife_lg,ALEl
+fishes,alewife,alewife_sm,ALEs
+fishes,atlantic salmon,atlantic salmon,ATS
+fishes,banded killifish,banded killifish,bkf
+fishes,bloater,bloater plankton,BIP
+fishes,bloater,bloater,BLO
+fishes,bloater,bloater_lg,BLOl
+fishes,bloater,bloater_sm,BLOs
+fishes,bloater,burbot,BUT
+fishes,brook silverside,brook silverside,bss
+fishes,brook stickleback,brook stickleback,STS
+fishes,brown trout,brown trout,BNT
+fishes,channel catfish,channel catfish,chc
+fishes,chinook salmon,chinook salmon,CHS
+fishes,coho salmon,coho salmon,COS
+fishes,deepwater sculpin,deepwater sculpin plankton,DIP
+fishes,deepwater sculpin,deepwater sculpin,DWS
+fishes,fathead minnow,fathead minnow,fhm
+fishes,freshwater drum,freshwater drum,fwd
+fishes,gizzard shad,gizzard shad,GZS
+fishes,golden shiner,golden shiner,gsh
+fishes,lake chub,lake chub,lkc
+fishes,lake trout,lake trout,LAT
+fishes,lake whitefish,lake whitefish,LWF
+fishes,longnose dace,longnose dace,lnd
+fishes,longnose sucker,longnose sucker,lns
+fishes,mottled sculpin,mottled sculpin,msc
+fishes,ninespine stickleback,ninespine stickleback,NSB
+fishes,pks,pks,PKS
+fishes,rainbow smelt,rainbow smelt,RAS
+fishes,rainbow trout,rainbow trout,RBT
+fishes,round goby,round goby,ROG
+fishes,round whitefish,round whitefish,rwf
+fishes,shorthead redhorse,shorthead redhorse,srh
+fishes,slimy sculpin,slimy sculpin,SLS
+fishes,slimy sculpin,slimy sculpin_lg,SMSl
+fishes,slimy sculpin,slimy sculpin_sm,SMSs
+fishes,smallmouth bass,smallmouth bass,smb
+fishes,spottail shiner,spottail shiner,SPS
+fishes,threespine stickleback,threespine stickleback,TSS
+fishes,walleye,walleye,WAE
+fishes,white perch,white perch,whp
+fishes,white sucker,white sucker,WHS
+fishes,yellow perch,yellow perch,YEP
+benthic algae,benthic algae,benthic algae,alg
+phytoplankton,green algae,green algae,phy
+phytoplankton,picoplankton,picoplankton,phy
+pom,pom,pom,pom
+zooplankton,bythotrephes,bythotrephes,byt
+zooplankton,copepods,copepods,zop
+zooplankton,hemimysis,hemimysis adult,ha
+zooplankton,hemimysis,hemimysis juvenile,hj
+zooplankton,mysis,mysis,mys
+zooplankton,rotifer,rotifer,zop
+zooplankton,zooplankton,zooplankton_63um,zop63
+zooplankton,zooplankton,zooplankton_153um,zop153
+zooplankton,zooplankton,zooplankton,zop

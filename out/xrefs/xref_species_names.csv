@@ -1,0 +1,58 @@
+﻿compartment,common_name,sci_name
+fishes,Alewife,Alosa pseudoharengus
+fishes,Atlantic salmon,Salmo salar
+fishes,Freshwater drum,Aplodinotus grunniens
+fishes,Longnose sucker,Catostomus catostomus
+fishes,White sucker,Catostomus commersonii
+fishes,Lake whitefish,Coregonus clupeaformis
+fishes,Bloater,Coregonus hoyi
+fishes,Mottled sculpin,Cottus bairdii
+fishes,Slimy sculpin,Cottus cognatus
+fishes,Lake chub,Couesius plumbeus
+fishes,Gizzard shad,Dorosoma cepedianum
+fishes,Banded killifish,Fundulus diaphanus
+fishes,Threespine stickleback,Gasterosteus aculeatus
+fishes,Channel catfish,Ictalurus punctatus
+fishes,Brook silverside,Labidesthes sicculus
+fishes,Burbot,Lota lota
+fishes,Smallmouth bass,Micropterus dolomieu
+fishes,White perch,Morone americana
+fishes,Shorthead redhorse,Moxostoma macrolepidotum
+fishes,Deepwater sculpin,Myoxocephalus thompsonii
+fishes,Round goby,Neogobius melanostomus
+fishes,Golden shiner,Notemigonus crysoleucas
+fishes,Spottail shiner,Notropis hudsonius
+fishes,Coho salmon,Oncorhynchus kisutch
+fishes,Rainbow trout,Oncorhynchus mykiss
+fishes,Chinook salmon,Oncorhynchus tshawytscha
+fishes,Rainbow smelt,Osmerus mordax
+fishes,Yellow perch,Perca flavescens
+fishes,Fathead minnow,Pimephales promelas
+fishes,Round whitefish,Prosopium cylindraceum
+fishes,Ninespine stickleback,Pungitius pungitius
+fishes,Longnose dace,Rhinichthys cataractae
+fishes,Brown trout,Salmo trutta
+fishes,Lake trout,Salvelinus namaycush
+fishes,Walleye,Sander vitreus
+benthic invert,amphipod,Amphipoda
+benthic invert,chironomids,Chironomidae
+benthic invert,crayfish,Cambaridae
+benthic invert,hydracarina,Hydrachnidia
+benthic invert,hydrachnidiae,Hydrachnidiae
+benthic invert,isopod,Asellidae
+benthic invert,leech,Hirudinea
+benthic invert,oligo-chiro,oligo-chiro
+benthic invert,oligochaete,Oligochaeta
+benthic invert,gastropoda,Gastropoda
+benthic invert,trichoptera,Trichoptera
+benthic invert,sphaeriidae,Sphaeriidae
+benthic invert,dreissena,Dreissena
+benthic algae,benthic algae,benthic algae
+pom,pom,POM
+zooplankton,bythotrephes,Bythotrephes longimanus
+zooplankton,hemimysis,Hemimysis anomala
+zooplankton,mysis,Mysis diluviana
+zooplankton,zooplankton,Zooplankton
+zooplankton,zooplankton153,Zooplankton153
+zooplankton,zooplankton240,Zooplankton240
+zooplankton,zooplankton63,Zooplankton63

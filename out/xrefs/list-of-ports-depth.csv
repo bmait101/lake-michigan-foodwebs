@@ -1,0 +1,52 @@
+Data Source,Port,Label for map,Lat (DD),Long (DD),Coordinate source
+USFWS,algoma,Algoma,44.608072,-87.432755,Google
+USEPA,arcadia,0-5m,44.48,-86.25,Heather Kane MS
+CSMI 2015,arcadia,18m,44.513217,-86.260433,Bo Bunnell
+CSMI 2015,arcadia,46m,44.485917,-86.307833,Bo Bunnell
+CSMI 2015,arcadia,110m,44.493983,-86.346717,Bo Bunnell
+USFWS,east chicago,East Chicago,41.668952,-87.438778,Google
+USFWS,frankfort,Frankfort,44.629546,-86.245202,Google
+USFWS,kenosha,Kenosha,42.588334,-87.817345,Google
+CSMI 2015,ludington,2-5m,43.95,-86.47,Heather Kane MS
+CSMI 2015,ludington,18m,43.928183,-86.503667,Bo Bunnell
+CSMI 2015,ludington,46m,43.9183,-86.582533,Bo Bunnell
+CSMI 2015,ludington,110m,43.91555,-86.672833,Bo Bunnell
+CSMI 2015,ludington,168m,43.917599,-86.728308,Bo Bunnell
+USFWS,manistee,Manistee,44.249696,-86.342451,Google
+CSMI 2015,manitowoc,2-5m,44.09,-87.6,Heather Kane MS
+CSMI 2015,manitowoc,18m,44.0722,-87.5804,Bo Bunnell
+CSMI 2015,manitowoc,46m,44.111683,-87.470233,Bo Bunnell
+CSMI 2015,manitowoc,110m,44.089733,-87.32495,Bo Bunnell
+USFWS,mckinley marina,McKinley Marina,43.04994,-87.88804,Google
+USFWS,michigan city,Michigan City,41.726366,-86.90674,Google
+USFWS,milwaukee south,Milwaukee South,42.905768,-87.842708,Google
+USFWS,port washington,Port Washington,43.386624,-87.868209,Google
+CSMI 2015,racine,0-5m,42.72,-87.78,Heather Kane MS
+CSMI 2015,racine,18m,42.721867,-87.695067,Bo Bunnell
+CSMI 2015,racine,46m,42.642733,-87.633167,Bo Bunnell
+CSMI 2015,racine,91m,42.658317,-87.608083,Bo Bunnell
+CSMI 2015,racine,110m,42.658033,-87.50815,Joel 2015 stations
+USFWS,racine,Racine,42.733334,-87.776521,Google
+CSMI 2015,saugatuck,0-5m,42.68,-86.22,Heather Kane MS
+CSMI 2015,saugatuck,18m,42.6917,-86.253367,Bo Bunnell
+CSMI 2015,saugatuck,46m,42.692083,-86.317583,Bo Bunnell
+CSMI 2015,saugatuck,105m,86.703582,86.703582,Guardian Nav Log
+CSMI 2015,saugatuck,110m,42.7089,-86.706467,Bo Bunnell
+USFWS,sheboygan,Sheboygan,43.754247,-87.701019,Google
+CSMI 2015,st joseph,0-5m,42.11,-86.49,Heather Kane MS
+CSMI 2015,st joseph,18m,42.13335,-86.530083,Bo Bunnell
+CSMI 2015,st joseph,46m,42.214933,-86.640683,Bo Bunnell
+CSMI 2015,st joseph,110m,42.2662,-86.80115,Bo Bunnell
+CSMI 2015,st joseph,134m,42.300567,-86.916935,Google
+CSMI 2015,st joseph,150m,42.637678,86.970902,Guardian Nav Log
+CSMI 2015,sturgeon bay,0-5m,44.79,-87.31,Heather Kane MS
+CSMI 2015,sturgeon bay,18m,44.7523,-87.2762,Bo Bunnell
+CSMI 2015,sturgeon bay,46m,44.699817,-87.261267,Bo Bunnell
+CSMI 2015,sturgeon bay,110m,44.691833,-87.150317,Bo Bunnell
+CSMI 2015,sturgeon bay,272m,44.5816385,-86.68363318,Joel 2015 stations
+USFWS,sturgeon bay,Sturgeon Bay,44.829669,-87.37743,Google
+CSMI 2015,waukegan,0-5m,42.36,-87.81,Heather Kane MS
+CSMI 2015,waukegan,18m,42.461167,-87.75315,Bo Bunnell
+CSMI 2015,waukegan,46m,42.447383,-87.682017,Bo Bunnell
+CSMI 2015,waukegan,91m,42.458233,-87.502633,Bo Bunnell
+CSMI 2015,waukegan,110m,42.458233,-87.502217,Joel 2015 stations
